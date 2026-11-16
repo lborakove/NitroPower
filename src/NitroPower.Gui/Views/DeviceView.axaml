@@ -87,7 +87,7 @@
 
         <!-- Zones -->
         <StackPanel Spacing="12" IsVisible="{Binding EditingZones}">
-          <UniformGrid Columns="4" ColumnSpacing="12">
+          <c:EvenGrid Columns="4" ColumnSpacing="12">
             <StackPanel Spacing="6">
               <TextBlock Classes="label" Text="{l:Tr rgb.zone1}" />
               <ColorPicker Color="{Binding Zone1}" IsAlphaVisible="False" HorizontalAlignment="Stretch" />
@@ -104,7 +104,7 @@
               <TextBlock Classes="label" Text="{l:Tr rgb.zone4}" />
               <ColorPicker Color="{Binding Zone4}" IsAlphaVisible="False" HorizontalAlignment="Stretch" />
             </StackPanel>
-          </UniformGrid>
+          </c:EvenGrid>
           <StackPanel Spacing="4" MaxWidth="420" HorizontalAlignment="Left">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Classes="label" Text="{l:Tr rgb.brightness}" />

@@ -8,7 +8,7 @@
   <Grid ColumnDefinitions="*,300" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
 
     <!-- Gauges -->
-    <UniformGrid Grid.ColumnSpan="2" Columns="4" ColumnSpacing="16">
+    <c:EvenGrid Grid.ColumnSpan="2" Columns="4" ColumnSpacing="16">
       <Border Classes="card" Padding="14,16">
         <StackPanel Spacing="10">
           <Grid ColumnDefinitions="*,Auto">
@@ -88,7 +88,7 @@
           <TextBlock Classes="caption" HorizontalAlignment="Center" Text="{l:Tr dash.fanFollowsGpu}" TextAlignment="Center" />
         </StackPanel>
       </Border>
-    </UniformGrid>
+    </c:EvenGrid>
 
     <!-- Temperature history -->
     <Border Grid.Row="1" Classes="card">
@@ -150,7 +150,7 @@
 
         <TextBlock Classes="label" Text="{l:Tr dash.fans}" Margin="0,8,0,0" />
         <Border Classes="segbar" HorizontalAlignment="Stretch">
-          <UniformGrid Columns="4" Classes="compact">
+          <c:EvenGrid Columns="4" Classes="compact">
             <Button Classes="seg" Classes.on="{Binding FanChoice, Converter={x:Static vm:Is.Auto}}" MinWidth="0"
                     Content="{l:Tr fans.auto.short}" Command="{Binding SetFansCommand}" CommandParameter="auto" />
             <Button Classes="seg" Classes.on="{Binding FanChoice, Converter={x:Static vm:Is.Max}}" MinWidth="0"
@@ -159,7 +159,7 @@
                     Content="{l:Tr fans.curve.short}" Command="{Binding SetFansCommand}" CommandParameter="curve" />
             <Button Classes="seg" Classes.on="{Binding FanChoice, Converter={x:Static vm:Is.Manual}}" MinWidth="0"
                     Content="{l:Tr fans.manual.short}" Command="{Binding SetFansCommand}" CommandParameter="manual" />
-          </UniformGrid>
+          </c:EvenGrid>
         </Border>
         <TextBlock Classes="caption" Text="{Binding FanChoiceText}" />
       </StackPanel>
@@ -183,7 +183,7 @@
 
     <!-- Other sensors -->
     <Border Grid.Row="3" Grid.ColumnSpan="2" Classes="card" Padding="18,14">
-      <UniformGrid Columns="4">
+      <c:EvenGrid Columns="4">
         <StackPanel Spacing="2">
           <TextBlock Classes="label" Text="{l:Tr dash.system}" />
           <TextBlock Classes="value" Text="{Binding SystemTempText}" />
@@ -200,7 +200,7 @@
           <TextBlock Classes="label" Text="{l:Tr dash.gpuOc}" />
           <TextBlock Classes="value" Text="{Binding GpuOcSummary}" />
         </StackPanel>
-      </UniformGrid>
+      </c:EvenGrid>
     </Border>
   </Grid>
 </UserControl>

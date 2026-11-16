@@ -214,6 +214,41 @@ public class UiTests(HeadlessFixture fixture, Xunit.Abstractions.ITestOutputHelp
         });
     }
 
+    /// <summary>
+    /// The last column of every grid ends exactly at the grid's right edge, at any window
+    /// width. Avalonia's UniformGrid let it spill by up to 2 px and clipped its border.
+    /// </summary>
+    [Theory]
+    [InlineData(1000)]
+    [InlineData(1220)]
+    [InlineData(1597)]
+    [InlineData(1920)]
+    public void Grid_cells_fit_the_grid_at_any_width(int width)
+    {
+        var problems = Run(async ui =>
+        {
+            var problems = new List<string>();
+            ui.Window.Width = width;
+            foreach (var page in ui.Vm.Pages)
+            {
+                ui.Vm.CurrentPage = page;
+                await Settle();
+                foreach (var grid in ui.Window.GetVisualDescendants().OfType<EvenGrid>().Where(g => g.IsEffectivelyVisible))
+                {
+                    var cells = grid.Children.Where(c => c.IsVisible).ToList();
+                    if (cells.Count == 0)
+                        continue;
+                    var right = cells.Max(c => Avalonia.Layout.LayoutInformation.GetPreviousArrangeBounds(c)?.Right ?? 0);
+                    var full = cells.Count >= grid.Columns;
+                    if (right > grid.Bounds.Width + 0.01 || (full && Math.Abs(right - grid.Bounds.Width) > 0.01))
+                        problems.Add($"{page.Key}: {grid.Columns} columns end at {right} in a {grid.Bounds.Width} wide grid");
+                }
+            }
+            return problems;
+        });
+        Assert.Empty(problems);
+    }
+
     [Fact]
     public void Presets_save_apply_and_delete_with_confirmation()
     {

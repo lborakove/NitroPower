@@ -14,7 +14,7 @@
         </StackPanel>
         <ItemsControl ItemsSource="{Binding Actions}">
           <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate><UniformGrid Columns="2" ColumnSpacing="12" RowSpacing="12" /></ItemsPanelTemplate>
+            <ItemsPanelTemplate><c:EvenGrid Columns="2" ColumnSpacing="12" RowSpacing="12" /></ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:KeyActionOption">

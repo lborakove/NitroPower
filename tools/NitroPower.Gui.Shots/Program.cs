@@ -24,20 +24,21 @@ internal static class Program
     {
         var dir = Path.GetFullPath(args.Length > 0 ? args[0] : "shots");
         var height = args.Length > 1 ? int.Parse(args[1], System.Globalization.CultureInfo.InvariantCulture) : 1500;
-        var only = args.Length > 2 ? args[2].Split(',') : null;
+        var only = args.Length > 2 && args[2] != "all" ? args[2].Split(',') : null;
+        var width = args.Length > 3 ? int.Parse(args[3], System.Globalization.CultureInfo.InvariantCulture) : 1220;
         Directory.CreateDirectory(dir);
         using var session = HeadlessUnitTestSession.StartNew(typeof(Entry));
-        session.Dispatch(() => Run(dir, height, only), CancellationToken.None).GetAwaiter().GetResult();
+        session.Dispatch(() => Run(dir, width, height, only), CancellationToken.None).GetAwaiter().GetResult();
         return 0;
     }
 
-    private static async Task<bool> Run(string dir, int height, string[]? only)
+    private static async Task<bool> Run(string dir, int width, int height, string[]? only)
     {
         var nitro = new NitroSession("/nonexistent", demo: true);
         var vm = new MainViewModel(nitro, Path.Join(dir, "gui-settings.json"));
         vm.UpdateSettings(s => s with { Language = "pt", Theme = "dark" });
         vm.ApplyTheme();
-        var window = new MainWindow { DataContext = vm, Width = 1220, Height = height };
+        var window = new MainWindow { DataContext = vm, Width = width, Height = height };
         nitro.Start();
         await nitro.RefreshStatus();
         for (var i = 0; i < 120; i++)

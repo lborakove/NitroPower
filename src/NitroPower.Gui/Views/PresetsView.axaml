@@ -39,7 +39,7 @@
 
     <ItemsControl ItemsSource="{Binding Presets}">
       <ItemsControl.ItemsPanel>
-        <ItemsPanelTemplate><UniformGrid Columns="3" ColumnSpacing="16" RowSpacing="16" /></ItemsPanelTemplate>
+        <ItemsPanelTemplate><c:EvenGrid Columns="3" ColumnSpacing="16" RowSpacing="16" /></ItemsPanelTemplate>
       </ItemsControl.ItemsPanel>
       <ItemsControl.ItemTemplate>
         <DataTemplate x:DataType="vm:PresetItem">

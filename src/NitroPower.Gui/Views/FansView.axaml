@@ -8,7 +8,7 @@
   <StackPanel Spacing="16">
 
     <!-- Choice -->
-    <UniformGrid Columns="4" ColumnSpacing="12">
+    <c:EvenGrid Columns="4" ColumnSpacing="12">
       <Button Classes="tile choice" Classes.on="{Binding IsAuto}" Command="{Binding SelectCommand}" CommandParameter="auto">
         <StackPanel Spacing="10">
           <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.auto}" Width="19" Height="19" /></Border>
@@ -37,7 +37,7 @@
           <TextBlock Classes="caption" Text="{l:Tr fans.curve.desc}" />
         </StackPanel>
       </Button>
-    </UniformGrid>
+    </c:EvenGrid>
 
     <Border Classes="notice" IsVisible="{Binding IsTurbo}">
       <StackPanel Orientation="Horizontal" Spacing="10">
@@ -54,7 +54,7 @@
             <c:Icon Data="{DynamicResource ico.fan}" Foreground="#38BDF8" />
             <TextBlock Classes="h3" Text="{l:Tr fans.curve.cpu}" VerticalAlignment="Center" />
           </StackPanel>
-          <UniformGrid Columns="3">
+          <c:EvenGrid Columns="3">
             <StackPanel Spacing="2">
               <TextBlock Classes="label" Text="{l:Tr fans.speed}" />
               <TextBlock Classes="value" Text="{Binding CpuRpm}" />
@@ -67,7 +67,7 @@
               <TextBlock Classes="label" Text="{l:Tr fans.cpuTemp}" />
               <TextBlock Classes="value" Text="{Binding CpuTemp}" />
             </StackPanel>
-          </UniformGrid>
+          </c:EvenGrid>
         </StackPanel>
       </Border>
       <Border Grid.Column="1" Classes="card">
@@ -76,7 +76,7 @@
             <c:Icon Data="{DynamicResource ico.fan}" Foreground="#A3E635" />
             <TextBlock Classes="h3" Text="{l:Tr fans.curve.gpu}" VerticalAlignment="Center" />
           </StackPanel>
-          <UniformGrid Columns="3">
+          <c:EvenGrid Columns="3">
             <StackPanel Spacing="2">
               <TextBlock Classes="label" Text="{l:Tr fans.speed}" />
               <TextBlock Classes="value" Text="{Binding GpuRpm}" />
@@ -89,7 +89,7 @@
               <TextBlock Classes="label" Text="{l:Tr fans.gpuTemp}" />
               <TextBlock Classes="value" Text="{Binding GpuTemp}" />
             </StackPanel>
-          </UniformGrid>
+          </c:EvenGrid>
         </StackPanel>
       </Border>
     </Grid>

@@ -69,7 +69,7 @@
         </Grid>
         <ItemsControl ItemsSource="{Binding DriverParameters}">
           <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate><UniformGrid Columns="3" ColumnSpacing="24" /></ItemsPanelTemplate>
+            <ItemsPanelTemplate><c:EvenGrid Columns="3" ColumnSpacing="24" /></ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:InfoRow">

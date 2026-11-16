@@ -16,7 +16,7 @@
         </StackPanel>
         <ItemsControl ItemsSource="{Binding Modes}">
           <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate><UniformGrid Columns="4" ColumnSpacing="12" /></ItemsPanelTemplate>
+            <ItemsPanelTemplate><c:EvenGrid Columns="4" ColumnSpacing="12" /></ItemsPanelTemplate>
           </ItemsControl.ItemsPanel>
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:ModeItem">
@@ -127,7 +127,7 @@
 
         <TextBlock Classes="caption" Text="{l:Tr gpu.noLevels}" IsVisible="{Binding !HasOverclock}" />
 
-        <UniformGrid Columns="3" ColumnSpacing="12" IsVisible="{Binding HasOverclock}">
+        <c:EvenGrid Columns="3" ColumnSpacing="12" IsVisible="{Binding HasOverclock}">
           <Border Classes="inset">
             <StackPanel Spacing="3">
               <TextBlock Classes="label" Text="{l:Tr gpu.now}" />
@@ -146,7 +146,7 @@
               <TextBlock Classes="caption" Text="{Binding PolicyText}" Foreground="{DynamicResource Np.Text}" />
             </StackPanel>
           </Border>
-        </UniformGrid>
+        </c:EvenGrid>
 
         <StackPanel Spacing="8" IsVisible="{Binding HasOverclock}">
           <StackPanel Spacing="2" Margin="0,4,0,0">
