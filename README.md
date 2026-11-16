@@ -65,6 +65,7 @@ sudo. Sem o daemon, os comandos agem direto no hardware e alterações pedem sud
 ## Documentação
 
 - [Linuwu-Sense no NitroPower](docs/LINUWU-SENSE.md)
+- [Atualizar a BIOS pelo Linux](docs/BIOS.md)
 - [API do nitropowerd](docs/API.md)
 - [Arquitetura e roteiro](docs/ARQUITETURA.md)
 - Modelos suportados: veja [`profiles/`](profiles/)

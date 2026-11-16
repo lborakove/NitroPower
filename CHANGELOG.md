@@ -9,6 +9,7 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 
 - Estrutura do repositório e arquitetura.
 - Perfil do Acer Nitro V 15 (ANV15-52), BIOS V1.31/V1.60.
+- Guia para atualizar a BIOS pelo Linux com o fwupd (`docs/BIOS.md`).
 - Driver `linuwu_sense` (upstream 4483b6c) com o patch 0001: fallback para a
   interface WMI quando `EC0._Q30` não existe, e o modo Performance da Acer
   exposto como `performance` quando o firmware não tem turbo.
