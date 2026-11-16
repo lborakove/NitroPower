@@ -211,14 +211,19 @@ public sealed partial class FansViewModel : PageViewModel
     }
 
     private FanCurveSettings? _loadedCurve;
+    private FanSpeeds? _loadedSpeeds;
 
     protected override void OnStatus(NitroStatus s)
     {
-        if (s.FanChoice is { } c && FanSpeeds.TryParse(c) is { IsAuto: false } speeds && c != "max")
+        // Like the curve below: only new daemon values move the sliders, so a move
+        // waiting to be applied, or "link" unticked at equal speeds, is kept
+        if (s.FanChoice is { } c && FanSpeeds.TryParse(c) is { IsAuto: false } speeds && c != "max" && speeds != _loadedSpeeds)
         {
             ManualCpu = speeds.Cpu;
             ManualGpu = speeds.Gpu;
-            LinkSpeeds = speeds.Cpu == speeds.Gpu;
+            if (speeds.Cpu != speeds.Gpu)
+                LinkSpeeds = false;
+            _loadedSpeeds = speeds;
         }
         // Reload the editor only when the saved curve changed, keeping edits in progress
         var saved = s.FanCurve ?? FanCurveSettings.Default;

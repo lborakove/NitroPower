@@ -8,11 +8,12 @@ using NitroPower.Gui.Localization;
 
 namespace NitroPower.Gui.ViewModels;
 
-public sealed class EffectOption(KeyboardEffect effect)
+public sealed class EffectOption(KeyboardEffect effect) : ObservableObject
 {
     public KeyboardEffect Effect { get; } = effect;
     public string Name => Loc.T($"rgb.effect.{Effect.ToString().ToLowerInvariant()}");
     public override string ToString() => Name;
+    public void Relocalize() => OnPropertyChanged(nameof(Name));
 }
 
 /// <summary>Keyboard light, display and boot options, and the 4-zone RGB keyboard.</summary>
@@ -48,7 +49,7 @@ public sealed partial class DeviceViewModel : PageViewModel
     [RelayCommand]
     private void EditTab(string tab) => EditingZones = tab == "zones";
 
-    public IReadOnlyList<EffectOption> Effects { get; private set; }
+    public IReadOnlyList<EffectOption> Effects { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UsesColor), nameof(UsesSpeed), nameof(UsesDirection), nameof(PreviewZone1),
@@ -169,9 +170,8 @@ public sealed partial class DeviceViewModel : PageViewModel
     {
         foreach (var t in Toggles)
             t.Relocalize();
-        var selected = SelectedEffect.Effect;
-        Effects = Enum.GetValues<KeyboardEffect>().Select(e => new EffectOption(e)).ToList();
-        SelectedEffect = Effects.First(e => e.Effect == selected);
+        foreach (var e in Effects)
+            e.Relocalize();
         base.OnLanguageChanged();
     }
 }

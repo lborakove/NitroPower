@@ -71,8 +71,9 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 - `install-dev.sh` instala a interface, o atalho e os ícones; `--replace-damx`
   esconde também o atalho do DAMX. `watch --notify` abre a janela pela tecla
   Nitro quando ela não está aberta.
-- 144 testes: 127 do Core e 17 da interface (textos nos dois idiomas, bateria,
-  e testes de interação headless: modos, turbo, curva, perfis, idioma).
+- 160 testes: 127 do Core e 33 da interface (textos nos dois idiomas, bateria,
+  e testes de interação headless: modos, turbo, curva, perfis, idioma, e uma
+  varredura que clica em cada opção, interruptor e lista de cada página).
 
 ### Segurança
 
@@ -98,3 +99,13 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/).
 - `driver/linuwu_sense/dkms-sign.sh` faltava (o `dkms.conf` o chama).
 - Perfil apontava para um `profile.schema.json` inexistente.
 - Removidos membros sem uso e comentários divisores.
+- Interface: o idioma não voltava para inglês depois de escolher português. As
+  listas de idioma, tema, intervalo e efeito RGB eram recriadas a cada troca de
+  idioma, e o ComboBox restaurava a escolha anterior.
+- Interface: "Mesma velocidade nas duas" não desmarcava com as duas ventoinhas na
+  mesma velocidade, e uma atualização de estado podia desfazer um ajuste dos
+  controles de velocidade manual ainda não aplicado.
+- Interface: "Manual" no painel abria a página Ventoinhas sem selecionar o modo
+  manual.
+- Interface: o interruptor de overdrive da tela ficava clicável quando o
+  firmware não informa o estado, e voltava sozinho para desligado.

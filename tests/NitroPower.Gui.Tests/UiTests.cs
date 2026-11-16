@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
@@ -31,7 +32,7 @@ public sealed class HeadlessFixture : IDisposable
 }
 
 /// <summary>The real window over the demo API, driven with headless input.</summary>
-public class UiTests(HeadlessFixture fixture) : IClassFixture<HeadlessFixture>
+public class UiTests(HeadlessFixture fixture, Xunit.Abstractions.ITestOutputHelper output) : IClassFixture<HeadlessFixture>
 {
     private sealed record Ui(MainWindow Window, MainViewModel Vm, NitroSession Nitro, string Dir);
 
@@ -72,6 +73,8 @@ public class UiTests(HeadlessFixture fixture) : IClassFixture<HeadlessFixture>
 
     private static async Task Click(Window window, Control control)
     {
+        control.BringIntoView();
+        await Settle();
         var center = control.TranslatePoint(new Point(control.Bounds.Width / 2, control.Bounds.Height / 2), window)!.Value;
         window.MouseDown(center, MouseButton.Left);
         window.MouseUp(center, MouseButton.Left);
@@ -121,6 +124,27 @@ public class UiTests(HeadlessFixture fixture) : IClassFixture<HeadlessFixture>
             Assert.Equal(("balanced", "auto"), (ui.Nitro.Status.Mode, ui.Nitro.Status.FanChoice));
             return true;
         });
+    }
+
+    [Fact]
+    public void Language_combo_switches_back_and_forth()
+    {
+        var auto = Loc.FromEnvironment();
+        var seen = Run(async ui =>
+        {
+            ui.Vm.ShowPage("system");
+            await Settle();
+            var seen = new List<string>();
+            foreach (var choice in new[] { "en", "pt", "en", "auto", "pt", "en" })
+            {
+                var combo = All<ComboBox>(ui.Window).First(c => c.ItemsSource is IEnumerable<Choice> l && l.Any(i => i.Value == "pt"));
+                combo.SelectedIndex = ((IEnumerable<Choice>)combo.ItemsSource!).ToList().FindIndex(c => c.Value == choice);
+                await Settle();
+                seen.Add($"{ui.Vm.Settings.Language} {Loc.Instance.Language} {(combo.SelectedItem as Choice)?.Value}");
+            }
+            return seen;
+        });
+        Assert.Equal(["en en en", "pt pt pt", "en en en", $"auto {auto} auto", "pt pt pt", "en en en"], seen);
     }
 
     [Fact]
@@ -256,5 +280,225 @@ public class UiTests(HeadlessFixture fixture) : IClassFixture<HeadlessFixture>
             Assert.False(card.IsAvailable);
             return true;
         });
+    }
+
+    private static string Describe(Control c) =>
+        c is Button { CommandParameter: string p }
+            ? p
+            : All<TextBlock>(c).Select(t => t.Text).FirstOrDefault(t => !string.IsNullOrEmpty(t)) ?? c.GetType().Name;
+
+    /// <summary>Visible option buttons ("seg" bars and "tile" cards), one list per bar or list.</summary>
+    private static List<(string Sig, List<Button> Buttons)> ChoiceGroups(Visual root) =>
+        All<Button>(root)
+            .Where(b => b.IsEffectivelyVisible && (b.Classes.Contains("seg") || b.Classes.Contains("tile")))
+            .GroupBy(b => b.GetVisualAncestors().FirstOrDefault(v => v is ItemsControl || (v is Border br && br.Classes.Contains("segbar")))
+                          ?? b.GetVisualParent())
+            .Select(g => g.ToList())
+            .Select(g => (string.Join("|", g.Select(Describe)), g))
+            .ToList();
+
+    private static async Task AnswerYesIfAsked(Ui ui)
+    {
+        if (ui.Vm.Confirm is null)
+            return;
+        var yes = All<Button>(ui.Window).First(b => b.IsEffectivelyVisible && b.Command == ui.Vm.AnswerCommand && "yes".Equals(b.CommandParameter));
+        await Click(ui.Window, yes);
+    }
+
+    private static async Task Refresh(Ui ui)
+    {
+        await AnswerYesIfAsked(ui);
+        await ui.Nitro.RefreshStatus();
+        await Settle();
+    }
+
+    [Theory]
+    [InlineData("dashboard")]
+    [InlineData("performance")]
+    [InlineData("fans")]
+    [InlineData("battery")]
+    [InlineData("device")]
+    [InlineData("nitrokey")]
+    public void Every_option_button_stays_selected_after_a_click(string page)
+    {
+        var (clicks, problems) = Run(async ui =>
+        {
+            var problems = new List<string>();
+            var tested = new HashSet<string>();
+            var clicks = 0;
+            if (page == "nitrokey")
+            {
+                ui.Nitro.Demo!.SimulateDriverModeKey(); // shows the mode key options
+                await ui.Nitro.RefreshStatus();
+            }
+            while (true)
+            {
+                ui.Vm.ShowPage(page);
+                await Settle();
+                var next = ChoiceGroups(ui.Window).FirstOrDefault(g => !tested.Contains(g.Sig));
+                if (next.Buttons is null)
+                    break;
+                tested.Add(next.Sig);
+                for (var i = 0; i < next.Buttons.Count; i++)
+                {
+                    ui.Vm.ShowPage(page);
+                    await Settle();
+                    var group = ChoiceGroups(ui.Window).FirstOrDefault(g => g.Sig == next.Sig).Buttons;
+                    if (group is null)
+                    {
+                        problems.Add($"[{next.Sig}] disappeared");
+                        break;
+                    }
+                    var name = Describe(group[i]);
+                    if (!group[i].IsEffectivelyEnabled)
+                    {
+                        problems.Add($"[{next.Sig}] {name} is disabled");
+                        continue;
+                    }
+                    await Click(ui.Window, group[i]);
+                    await Refresh(ui);
+                    clicks++;
+                    if (ui.Vm.CurrentPage.Key != page)
+                    {
+                        // Manual fan speeds need the sliders: the dashboard opens the Fans page for them
+                        if (!(page == "dashboard" && name == "manual" && ui.Vm.CurrentPage.Key == "fans" && ui.Vm.Fans.IsManual))
+                            problems.Add($"[{next.Sig}] {name} opened {ui.Vm.CurrentPage.Key}");
+                        continue;
+                    }
+                    var after = ChoiceGroups(ui.Window).FirstOrDefault(g => g.Sig == next.Sig).Buttons;
+                    var lit = after?.Where(b => b.Classes.Contains("on")).Select(Describe).ToList() ?? [];
+                    if (lit.Count != 1 || lit[0] != name)
+                        problems.Add($"[{next.Sig}] clicked {name}, lit: [{string.Join(", ", lit)}]");
+                }
+            }
+            return (clicks, problems);
+        });
+        output.WriteLine($"{page}: {clicks} option clicks");
+        Assert.Empty(problems);
+        Assert.True(clicks >= 2, $"only {clicks} option buttons found on {page}");
+    }
+
+    [Theory]
+    [InlineData("performance")]
+    [InlineData("fans")]
+    [InlineData("battery")]
+    [InlineData("device")]
+    [InlineData("system")]
+    public void Every_switch_and_checkbox_toggles_and_holds(string page)
+    {
+        var configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
+        var problems = Run(async ui =>
+        {
+            Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", ui.Dir);
+            var problems = new List<string>();
+            ui.Vm.ShowPage(page);
+            if (page == "fans")
+                await ui.Vm.Fans.SelectCommand.ExecuteAsync("manual"); // shows "link speeds"
+            await Settle();
+            var count = All<ToggleButton>(ui.Window).Count(t => t.IsEffectivelyVisible);
+            if (count == 0)
+                problems.Add("no switches found");
+            var toggled = 0;
+            for (var i = 0; i < count; i++)
+            {
+                var toggle = All<ToggleButton>(ui.Window).Where(t => t.IsEffectivelyVisible).ElementAt(i);
+                var name = Describe((Control?)toggle.GetVisualAncestors().OfType<Grid>().FirstOrDefault() ?? toggle);
+                if (!toggle.IsEffectivelyEnabled)
+                    continue;
+                var before = toggle.IsChecked == true;
+                toggled++;
+                foreach (var want in new[] { !before, before })
+                {
+                    await Click(ui.Window, toggle);
+                    await Refresh(ui);
+                    toggle = All<ToggleButton>(ui.Window).Where(t => t.IsEffectivelyVisible).ElementAt(i);
+                    if ((toggle.IsChecked == true) != want)
+                        problems.Add($"{name}: wanted {(want ? "on" : "off")}, shows {(toggle.IsChecked == true ? "on" : "off")}");
+                }
+            }
+            output.WriteLine($"{page}: {toggled} of {count} switches toggled");
+            return problems;
+        });
+        Environment.SetEnvironmentVariable("XDG_CONFIG_HOME", configHome);
+        Assert.Empty(problems);
+    }
+
+    [Theory]
+    [InlineData("system")]
+    [InlineData("device")]
+    public void Every_combo_item_can_be_chosen_in_both_languages(string page)
+    {
+        var problems = Run(async ui =>
+        {
+            var problems = new List<string>();
+            foreach (var language in new[] { "en", "pt" })
+            {
+                ui.Vm.UpdateSettings(s => s with { Language = language });
+                ui.Vm.ShowPage(page);
+                await Settle();
+                var combos = All<ComboBox>(ui.Window).Where(c => c.IsEffectivelyVisible).ToList();
+                if (combos.Count == 0)
+                    problems.Add("no combo boxes found");
+                for (var c = 0; c < combos.Count; c++)
+                {
+                    var items = combos[c].ItemCount;
+                    for (var i = 0; i < items; i++)
+                    {
+                        var combo = All<ComboBox>(ui.Window).Where(x => x.IsEffectivelyVisible).ElementAt(c);
+                        combo.SelectedIndex = i;
+                        await Refresh(ui);
+                        combo = All<ComboBox>(ui.Window).Where(x => x.IsEffectivelyVisible).ElementAt(c);
+                        if (combo.SelectedIndex != i)
+                            problems.Add($"{language} combo {c}: chose item {i}, shows {combo.SelectedIndex}");
+                    }
+                }
+                // Leave the language as it was chosen in this round, whatever the last combo item did
+                ui.Vm.UpdateSettings(s => s with { Language = language });
+                await Settle();
+            }
+            return problems;
+        });
+        Assert.Empty(problems);
+    }
+
+    [Fact]
+    public void Effect_choice_survives_a_language_change()
+    {
+        var (index, name) = Run(async ui =>
+        {
+            ui.Vm.ShowPage("device");
+            await Settle();
+            var combo = All<ComboBox>(ui.Window).First(c => c.ItemsSource == ui.Vm.Device.Effects);
+            combo.SelectedIndex = 2;
+            await Refresh(ui);
+            ui.Vm.UpdateSettings(s => s with { Language = "en" });
+            await Settle();
+            return (combo.SelectedIndex, ui.Vm.Device.SelectedEffect.Name);
+        });
+        Assert.Equal(2, index);
+        Assert.Equal(Strings.Get("rgb.effect." + Enum.GetValues<Core.Hardware.KeyboardEffect>()[2].ToString().ToLowerInvariant(), "en"), name);
+    }
+
+    [Fact]
+    public void Navigation_list_selects_every_page_and_keeps_it_after_a_language_change()
+    {
+        var problems = Run(async ui =>
+        {
+            var problems = new List<string>();
+            var nav = All<ListBox>(ui.Window).First(l => l.Classes.Contains("nav"));
+            for (var i = 0; i < ui.Vm.Pages.Count; i++)
+            {
+                var item = All<ListBoxItem>(nav).ElementAt(i);
+                await Click(ui.Window, item);
+                if (ui.Vm.CurrentPage != ui.Vm.Pages[i])
+                    problems.Add($"clicked {ui.Vm.Pages[i].Key}, current {ui.Vm.CurrentPage.Key}");
+            }
+            ui.Vm.UpdateSettings(s => s with { Language = "en" });
+            await Settle();
+            if (nav.SelectedItem != ui.Vm.CurrentPage)
+                problems.Add("navigation selection lost after language change");
+            return problems;
+        });
+        Assert.Empty(problems);
     }
 }

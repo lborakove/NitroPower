@@ -9,7 +9,18 @@ namespace NitroPower.Gui.ViewModels;
 
 public sealed record InfoRow(string Label, string Value);
 
-public sealed record Choice(string Value, string Label);
+/// <summary>An option of a ComboBox. Lists of choices are built once and only
+/// relabelled when the language changes: a new list given to a ComboBox while
+/// it is selecting makes it put the previous item back.</summary>
+public sealed class Choice(string value, Func<string> label) : ObservableObject
+{
+    public string Value { get; } = value;
+    public string Label => label();
+
+    public static Choice Translated(string value, string key) => new(value, () => Loc.T(key));
+
+    public void Relocalize() => OnPropertyChanged(nameof(Label));
+}
 
 /// <summary>About this machine and NitroPower, and the window's own preferences.</summary>
 public sealed partial class SystemViewModel(MainViewModel main) : PageViewModel(main)
@@ -105,25 +116,25 @@ public sealed partial class SystemViewModel(MainViewModel main) : PageViewModel(
     [RelayCommand]
     private void HideLogs() => Logs = null;
 
-    public IReadOnlyList<Choice> Languages =>
+    public IReadOnlyList<Choice> Languages { get; } =
     [
-        new(Loc.Auto, Loc.T("settings.language.auto")),
-        new(Loc.Portuguese, "Português (Brasil)"),
-        new(Loc.English, "English"),
+        Choice.Translated(Loc.Auto, "settings.language.auto"),
+        new(Loc.Portuguese, () => "Português (Brasil)"),
+        new(Loc.English, () => "English"),
     ];
 
-    public IReadOnlyList<Choice> Themes =>
+    public IReadOnlyList<Choice> Themes { get; } =
     [
-        new("dark", Loc.T("settings.theme.dark")),
-        new("light", Loc.T("settings.theme.light")),
-        new("system", Loc.T("settings.theme.system")),
+        Choice.Translated("dark", "settings.theme.dark"),
+        Choice.Translated("light", "settings.theme.light"),
+        Choice.Translated("system", "settings.theme.system"),
     ];
 
-    public IReadOnlyList<Choice> Intervals =>
+    public IReadOnlyList<Choice> Intervals { get; } =
     [
-        new("1000", Loc.T("settings.refresh.1")),
-        new("2000", Loc.T("settings.refresh.2")),
-        new("5000", Loc.T("settings.refresh.5")),
+        Choice.Translated("1000", "settings.refresh.1"),
+        Choice.Translated("2000", "settings.refresh.2"),
+        Choice.Translated("5000", "settings.refresh.5"),
     ];
 
     public Choice? Language
@@ -131,8 +142,10 @@ public sealed partial class SystemViewModel(MainViewModel main) : PageViewModel(
         get => Languages.FirstOrDefault(c => c.Value == Main.Settings.Language) ?? Languages[0];
         set
         {
-            if (value is not null)
-                Main.UpdateSettings(s => s with { Language = value.Value });
+            if (value is null)
+                return;
+            Main.UpdateSettings(s => s with { Language = value.Value });
+            OnPropertyChanged();
         }
     }
 
@@ -201,5 +214,12 @@ public sealed partial class SystemViewModel(MainViewModel main) : PageViewModel(
         OnPropertyChanged(nameof(Machine));
         OnPropertyChanged(nameof(Software));
         OnPropertyChanged(nameof(DriverParameters));
+    }
+
+    public override void OnLanguageChanged()
+    {
+        foreach (var choice in Languages.Concat(Themes).Concat(Intervals))
+            choice.Relocalize();
+        base.OnLanguageChanged();
     }
 }

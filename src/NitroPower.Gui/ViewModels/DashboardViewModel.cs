@@ -150,7 +150,8 @@ public sealed partial class DashboardViewModel(MainViewModel main) : PageViewMod
     {
         if (choice != "manual")
             return Main.SetFans(choice);
+        // Manual speeds are set with the sliders: apply the last ones and show them
         Main.ShowPage("fans");
-        return Task.CompletedTask;
+        return Main.Fans.SelectCommand.ExecuteAsync("manual");
     }
 }

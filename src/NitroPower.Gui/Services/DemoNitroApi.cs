@@ -46,6 +46,7 @@ public sealed class DemoNitroApi : INitroApi
     private bool _ocEnabled = true;
     private GpuClockOffsets[] _levels = ProfileLevels;
     private NitroKeyAction _key = NitroKeyAction.Turbo;
+    private ModeKeyBehavior? _modeKey;
     private KeyboardEffectState _effect = new(KeyboardEffect.Wave, 4, 80, KeyboardDirection.LeftToRight, Rgb.Black);
     private PerZoneColors _zones = new(new Rgb(0x2D, 0xD4, 0xBF), new Rgb(0x38, 0xBD, 0xF8), new Rgb(0xA7, 0x8B, 0xFA), new Rgb(0xF4, 0x3F, 0x5E), 80);
     private double _cpuTemp = 52, _gpuTemp = 46, _t;
@@ -97,7 +98,7 @@ public sealed class DemoNitroApi : INitroApi
                 Gpu = new GpuStatus("10de:28a0", "GeForce RTX 4060 Laptop", _ocEnabled, false, want, want,
                     _levels, ProfileLevels, new GpuOcPolicyConfig(true, 40, 30)),
                 NitroKeyAction = _key,
-                DriverModeKey = null,
+                DriverModeKey = _modeKey,
             };
         }
     }
@@ -305,7 +306,29 @@ public sealed class DemoNitroApi : INitroApi
         return result;
     }
 
-    public void SetModeKey(string behavior) => Changed("modeKey.set");
+    public void SetModeKey(string behavior)
+    {
+        lock (_lock)
+        {
+            if (_modeKey is null)
+                throw new NitroException("the driver has no mode key");
+            _modeKey = behavior switch
+            {
+                "cycle" => ModeKeyBehavior.Cycle,
+                "turbo" => ModeKeyBehavior.TurboToggle,
+                _ => throw new NitroException($"'{behavior}' is not cycle or turbo"),
+            };
+        }
+        Changed("modeKey.set");
+    }
+
+    /// <summary>Acts like a model whose driver handles the WMI mode key (the ANV15-52 does not).</summary>
+    public void SimulateDriverModeKey()
+    {
+        lock (_lock)
+            _modeKey ??= ModeKeyBehavior.Cycle;
+        Changed("modeKey.set");
+    }
 
     public IReadOnlyList<string> ListPresets()
     {

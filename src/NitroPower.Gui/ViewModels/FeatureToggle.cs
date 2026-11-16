@@ -27,7 +27,8 @@ public sealed partial class FeatureToggle(string id, string iconKey, Func<Featur
     [ObservableProperty]
     public partial bool IsOn { get; set; }
 
-    public bool CanChange => IsPresent;
+    /// <summary>Not when the state is unknown: the switch could not show what a change did.</summary>
+    public bool CanChange => IsPresent && !IsUnknown;
 
     public string? Note => !IsPresent ? Loc.T("feature.absent") : IsUnknown ? Loc.T("feature.unknown") : null;
 
