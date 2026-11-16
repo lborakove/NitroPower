@@ -1,75 +1,75 @@
-# Atualizar a BIOS pelo Linux
+# Updating the BIOS from Linux
 
-Como atualizar a BIOS do Acer Nitro ANV15-52 (Nitro V 15) sem Windows, com o
-`fwupd`. Testado em 2026-11-15, da V1.31 para a V1.60, no Ubuntu 26.04 com
-fwupd 2.1.1.
+How to update the BIOS of the Acer Nitro ANV15-52 (Nitro V 15) without
+Windows, using `fwupd`. Tested on 2026-11-15, from V1.31 to V1.60, on Ubuntu
+26.04 with fwupd 2.1.1.
 
-A Acer não publica a BIOS deste modelo no LVFS, por isso o
-`fwupdmgr get-updates` não oferece nada. A atualização chega aos usuários de
-Windows pelo Windows Update, e o mesmo pacote está no Microsoft Update Catalog.
-O pacote traz uma cápsula UEFI assinada, que o `fwupd` consegue entregar ao
-firmware.
+Acer does not publish this model's BIOS on the LVFS, so
+`fwupdmgr get-updates` offers nothing. Windows users get the update through
+Windows Update, and the same package is in the Microsoft Update Catalog. It
+contains a signed UEFI capsule that `fwupd` can hand to the firmware.
 
-> Gravar a BIOS tem risco. Uma queda de energia durante a gravação pode
-> inutilizar a placa-mãe. Siga os passos com o carregador ligado e por sua
-> conta.
+> Flashing the BIOS carries risk. A power loss while it is being written can
+> brick the motherboard. Follow these steps with the charger plugged in, at
+> your own risk.
 
-## Antes de começar
+## Before you start
 
-- **Energia:** ligue o carregador e deixe a bateria carregada. O `fwupd` não
-  prepara a atualização se o notebook estiver na bateria.
-- **Disco criptografado:** com LUKS desbloqueado por senha, nada muda. Se o
-  disco desbloqueia pelo TPM, tenha a chave de recuperação à mão: a BIOS nova
-  altera as medições do TPM (PCR 0).
-- **Secure Boot:** pode estar ligado ou desligado. O firmware confere a
-  assinatura da cápsula nos dois casos.
-- **Sem volta:** depois de gravada, a versão nova vira a mínima aceita. Não dá
-  para voltar à anterior.
+- **Power:** plug in the charger and keep the battery charged. `fwupd` will
+  not schedule the update while the laptop runs on battery.
+- **Encrypted disk:** with LUKS unlocked by a passphrase, nothing changes. If
+  the disk unlocks through the TPM, keep the recovery key at hand: the new BIOS
+  changes the TPM measurements (PCR 0).
+- **Secure Boot:** it can be on or off. The firmware checks the capsule's
+  signature either way.
+- **No going back:** once flashed, the new version becomes the minimum
+  accepted. You cannot return to the previous one.
 
-## 1. Ver a versão atual e o ID do firmware
+## 1. Check the current version and the firmware ID
 
 ```bash
 cat /sys/class/dmi/id/bios_version
 fwupdmgr get-devices | sed -n '/System Firmware/,/Device Flags/p' | grep -E 'Device ID|Current version|GUID'
 ```
 
-Anote:
+Write down:
 
-- **GUID:** no ANV15-52 é `12b99262-648c-4365-bafd-eb869fb7171e`. Ele aponta o
-  pacote certo no catálogo e a imagem certa dentro do pacote.
-- **Device ID:** o identificador do firmware no `fwupd`, uma sequência de 40
-  caracteres hexadecimais. É usado no passo 4.
-- **Current version:** um número decimal. Em hexadecimal, os quatro últimos
-  dígitos são a versão: `1415721265` = `0x54623131` = V1.31, e
-  `1415721312` = `0x54623160` = V1.60. Para converter:
+- **GUID:** on the ANV15-52 it is `12b99262-648c-4365-bafd-eb869fb7171e`. It
+  identifies the right package in the catalog and the right image inside the
+  package.
+- **Device ID:** the firmware's identifier in `fwupd`, a string of 40
+  hexadecimal characters. It is used in step 4.
+- **Current version:** a decimal number. In hexadecimal, its last four digits
+  are the version: `1415721265` = `0x54623131` = V1.31, and
+  `1415721312` = `0x54623160` = V1.60. To convert:
   `printf '0x%08X\n' 1415721312`.
 
-## 2. Baixar o pacote
+## 2. Download the package
 
-1. Abra o catálogo com a busca pelo GUID:
+1. Open the catalog searching for the GUID:
    <https://www.catalog.update.microsoft.com/Search.aspx?q=12b99262-648c-4365-bafd-eb869fb7171e>
-2. Escolha a linha **"Insyde Software Firmware Driver Update (1.0.XX.0)"** com
-   a versão mais alta. A versão 1.0.60.0 corresponde à BIOS V1.60.
-3. Clique em **Download** e salve o `.cab`, de uns 16 MB.
+2. Pick the **"Insyde Software Firmware Driver Update (1.0.XX.0)"** row with
+   the highest version. Version 1.0.60.0 is BIOS V1.60.
+3. Click **Download** and save the `.cab`, about 16 MB.
 
-Não use o arquivo da página de suporte da Acer se ele tiver poucos KB: não é a
-BIOS completa.
+Do not use the file from Acer's support page if it is only a few KB: it is not
+the full BIOS.
 
-## 3. Conferir e extrair
+## 3. Verify and extract
 
 ```bash
-sha1sum ~/Downloads/<arquivo>.cab
-mkdir -p ~/bios && cabextract -d ~/bios ~/Downloads/<arquivo>.cab
+sha1sum ~/Downloads/<file>.cab
+mkdir -p ~/bios && cabextract -d ~/bios ~/Downloads/<file>.cab
 grep -i DriverVer ~/bios/*.inf
 grep -A3 '^\[Firmware_AddReg_' ~/bios/*.inf
 ```
 
-- O SHA-1 tem de ser igual ao hash no fim do nome do arquivo baixado.
-- O `cabextract` pode avisar de "extra bytes at end of file": é a assinatura
-  do pacote, e o aviso pode ser ignorado.
-- O pacote traz duas imagens `.fd`, uma para cada variante da placa (`ZYP` e
-  `ZYQ`). O `.inf` diz qual é qual. Use **somente** a imagem cujo `FirmwareId`
-  termina com o GUID do passo 1 (`…7171E`). Na V1.60:
+- The SHA-1 must match the hash at the end of the downloaded file's name.
+- `cabextract` may warn about "extra bytes at end of file": that is the
+  package's signature, and the warning can be ignored.
+- The package contains two `.fd` images, one for each board variant (`ZYP` and
+  `ZYQ`). The `.inf` says which is which. Use **only** the image whose
+  `FirmwareId` ends with the GUID from step 1 (`…7171E`). For V1.60:
 
   ```text
   [Firmware_AddReg_ZYP]
@@ -78,10 +78,10 @@ grep -A3 '^\[Firmware_AddReg_' ~/bios/*.inf
   HKR,,FirmwareCapsuleFilename,,"%13%\BIOS_V1.60_ZYP.fd"
   ```
 
-  Aqui a imagem certa é a `BIOS_V1.60_ZYP.fd`. O `FirmwareVersion` dela
-  (`0x54623160`) precisa ser maior que a versão atual do passo 1.
+  Here the right image is `BIOS_V1.60_ZYP.fd`. Its `FirmwareVersion`
+  (`0x54623160`) must be higher than the current version from step 1.
 
-## 4. Preparar a gravação
+## 4. Stage the update
 
 ```bash
 sudo systemctl stop fwupd
@@ -89,42 +89,41 @@ sudo fwupdtool install-blob ~/bios/BIOS_VX.XX_ZYP.fd <Device ID>
 sudo systemctl start fwupd
 ```
 
-- O pacote do catálogo é do Windows Update, não do LVFS. Por isso o
-  `fwupdmgr install` não o aceita, e é preciso entregar a imagem direto ao
-  dispositivo com o `fwupdtool install-blob`.
-- O `fwupdtool` trabalha sem o serviço do `fwupd`, por isso o serviço é
-  parado antes e religado depois.
-- Este passo não grava nada. Ele só deixa a cápsula pronta para o próximo
-  boot.
-- **Se aparecer erro ou aviso em vez de sucesso, não reinicie.** Investigue
-  antes.
+- The catalog package comes from Windows Update, not from the LVFS. That is
+  why `fwupdmgr install` does not accept it, and the image has to be handed
+  straight to the device with `fwupdtool install-blob`.
+- `fwupdtool` works without the `fwupd` service, so the service is stopped
+  before and started again after.
+- This step writes nothing. It only stages the capsule for the next boot.
+- **If you get an error or a warning instead of success, do not reboot.**
+  Investigate first.
 
-## 5. Reiniciar e gravar
+## 5. Reboot and flash
 
 ```bash
 sudo reboot
 ```
 
-- Aparece uma tela da Insyde com uma barra de progresso. Ali o firmware confere
-  a assinatura e recusa uma imagem de outro modelo.
-- O notebook pode reiniciar mais de uma vez, e as ventoinhas podem ir ao
-  máximo. Leva alguns minutos.
-- **Não desligue nem tire da tomada** até o sistema voltar.
+- An Insyde screen with a progress bar appears. There the firmware checks the
+  signature and rejects an image for another model.
+- The laptop may restart more than once, and the fans may spin up to maximum.
+  It takes a few minutes.
+- **Do not power off or unplug** until the system is back.
 
-## 6. Se o Ubuntu não iniciar
+## 6. If Ubuntu does not boot
 
-A atualização pode apagar as entradas de boot. Aperte **F12** na tela da Acer,
-escolha `ubuntu` e, já no sistema, recrie a entrada:
+The update may erase the boot entries. Press **F12** at the Acer screen, choose
+`ubuntu` and, once in the system, recreate the entry:
 
 ```bash
 lsblk -o NAME,FSTYPE,MOUNTPOINT | grep -E 'vfat|/boot/efi'
 sudo efibootmgr -c -d /dev/nvme0n1 -p 1 -L ubuntu -l '\EFI\ubuntu\shimx64.efi'
 ```
 
-O exemplo supõe a partição EFI em `nvme0n1p1`. Ajuste `-d` e `-p` ao que o
-`lsblk` mostrar.
+The example assumes the EFI partition is `nvme0n1p1`. Adjust `-d` and `-p` to
+what `lsblk` shows.
 
-## 7. Conferir depois
+## 7. Check afterwards
 
 ```bash
 cat /sys/class/dmi/id/bios_version
@@ -133,20 +132,20 @@ cat /sys/firmware/acpi/platform_profile_choices
 journalctl -u nitropowerd -b --no-pager | head -12
 ```
 
-- A versão nova deve aparecer, com `Update State: Success`.
-- Teste os modos, o turbo, as ventoinhas e a tecla Nitro. Uma BIOS nova pode
-  mudar o caminho que o driver usa para trocar de modo (veja
-  [Linuwu-Sense no NitroPower](LINUWU-SENSE.md)).
-- Se tudo funcionar, acrescente a versão em `testedBios` no perfil
+- The new version should show, with `Update State: Success`.
+- Test the modes, turbo, fans and the Nitro key. A new BIOS may change the path
+  the driver uses to switch modes (see
+  [Linuwu-Sense in NitroPower](LINUWU-SENSE.md)).
+- If everything works, add the version to `testedBios` in the profile
   [`profiles/acer-nitro-anv15-52.json`](../profiles/acer-nitro-anv15-52.json).
-  Se algo parar de funcionar, abra uma issue com a versão da BIOS e a saída
-  dos comandos acima.
+  If something stops working, open an issue with the BIOS version and the
+  output of the commands above.
 
-## Versões conhecidas do ANV15-52
+## Known ANV15-52 versions
 
-| BIOS | Situação no NitroPower |
+| BIOS | Status in NitroPower |
 | --- | --- |
-| V1.31 | testada |
-| V1.52 | não testada |
-| V1.53 | não testada. Segundo o Linuwu-Sense upstream, troca de modo pelo `EC0._Q30`, que a V1.31 e a V1.60 não têm |
-| V1.60 | testada, atualizada por este roteiro. Traz os certificados de Secure Boot de 2023 da Microsoft |
+| V1.31 | tested |
+| V1.52 | untested |
+| V1.53 | untested. According to upstream Linuwu-Sense, it switches modes through `EC0._Q30`, which V1.31 and V1.60 lack |
+| V1.60 | tested, updated with this guide. Includes Microsoft's 2023 Secure Boot certificates |

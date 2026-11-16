@@ -1,75 +1,76 @@
-# Linuwu-Sense no NitroPower
+# Linuwu-Sense in NitroPower
 
-O NitroPower inclui o driver `linuwu_sense` (em `driver/`) e reimplementa em
-C# tudo o que o Linuwu-Sense faz em espaço de usuário. Esta página mapeia cada
-função do Linuwu-Sense para o NitroPower e diz o que funciona no ANV15-52.
+NitroPower bundles the `linuwu_sense` driver (in `driver/`) and reimplements in
+C# everything Linuwu-Sense does in user space. This page maps each Linuwu-Sense
+feature to NitroPower and states what works on the ANV15-52.
 
-Base: upstream `4483b6c` com os patches 0001 e 0002 (veja `driver/patches/`).
+Base: upstream `4483b6c` with patches 0001 and 0002 (see `driver/patches/`).
 
-## Funções do driver
+## Driver features
 
-| Função do Linuwu-Sense | Onde fica no NitroPower | ANV15-52 |
-|---|---|---|
-| `platform_profile` (eco, quiet, balanced, performance, turbo) | `PlatformProfile`, `NitroController.SetMode`; `nitropower-cli mode <id>` | funciona (patch 0001); sem turbo no firmware |
-| Tecla de modo (evento WMI 7): ciclo de modos ou alternância de turbo, com `cycle_gaming_thermal_profile` | `ModeCycler` + `NitroController.PressModeKey`; `nitropower-cli mode next` e `turbo toggle`; o parâmetro em `nitropower-cli mode-key` | a tecla Nitro chega como `KEY_PROG1` pelo teclado, não pelo WMI: o driver nunca executa esta lógica aqui. O `nitropowerd` escuta a tecla e executa a ação escolhida (`nitropower-cli nitro-key turbo|cycle|gui|none`) |
-| Quiet e eco devolvem as ventoinhas ao automático, na tecla de modo | `ModeCycleConfig.FansAutoOn` | funciona |
-| Turbo (`acer_toggle_turbo`): LED de turbo, ventoinhas no máximo, OC por WMI (ajustes 0x05 e 0x07) | `NitroController.SetTurbo`: modo mais alto do perfil, ventoinhas do perfil, OC da GPU pelo NVML no nível desse modo. Desligar restaura modo e ventoinhas | funciona como turbo do NitroPower (desempenho + ventoinhas no máximo + GPU +100/+200). O OC por WMI é dos Predator antigos, e o NitroSense deste modelo usa NvAPI |
-| `turbo_sense/turbo_state` (LED de turbo, com `sysfs_notify`) | `TurboSense`; `status`, `probe` e `watch` | não existe: com `turbo_sense=1` o firmware lê 0 e o notebook não tem LED de turbo |
-| `fan_speed` (auto, máximo, CPU/GPU em %) | `NitroSenseDevice.SetFanSpeeds`; `nitropower-cli fan` | funciona |
-| `battery_limiter` (carga até 80%) | `nitropower-cli battery-limit` | funciona |
-| `battery_calibration` | `nitropower-cli battery-calibration` | funciona |
-| `usb_charging` (0, 10, 20, 30%) | `nitropower-cli usb-charging` | funciona |
-| `backlight_timeout` (luz do teclado apaga em 30 s) | `nitropower-cli keyboard-timeout` | funciona |
-| `lcd_override` (LCD overdrive) | `nitropower-cli lcd-overdrive` | o firmware responde `0xFF000001000000`, fora dos valores esperados: provavelmente não suportado |
-| `boot_animation_sound` | `nitropower-cli boot-sound` | o firmware responde status 1: provavelmente não suportado |
-| `four_zoned_kb/four_zone_mode`: efeitos static, breathing, neon, wave, shifting, zoom, meteor, twinkling (velocidade, brilho, direção, cor) | `FourZoneKeyboard`, `KeyboardEffectState` (mesmas regras de validação do driver); `nitropower-cli keyboard effect` | não existe: com `four_zone_kb=1` o efeito lê tudo zero |
-| `four_zoned_kb/per_zone_mode`: cor por zona + brilho | `PerZoneColors`; `nitropower-cli keyboard zones` | não existe: o firmware responde status 1 (erro) nas quatro zonas |
-| Estado por fonte de energia (perfil e ventoinhas na tomada e na bateria, em `/etc/predator_state`) | continua no driver (evento WMI de AC) | funciona no driver |
-| Estado do teclado em `/etc/four_zone_kb_state` | continua no driver | — |
-| hwmon (temperaturas, RPM das ventoinhas) | `Hwmon`, `SensorReader`; `probe` | funciona |
-| Controlador RGB HID (ENEK5130, `0CF2:5130`) | não portado: não há esse dispositivo neste modelo | ausente |
+| Linuwu-Sense feature | Where it lives in NitroPower | ANV15-52 |
+| --- | --- | --- |
+| `platform_profile` (eco, quiet, balanced, performance, turbo) | `PlatformProfile`, `NitroController.SetMode`; `nitropower-cli mode <id>` | works (patch 0001); no turbo in the firmware |
+| Mode key (WMI event 7): cycle modes or toggle turbo, with `cycle_gaming_thermal_profile` | `ModeCycler` + `NitroController.PressModeKey`; `nitropower-cli mode next` and `turbo toggle`; the parameter through `nitropower-cli mode-key` | the Nitro key arrives as `KEY_PROG1` from the keyboard, not through WMI, so the driver never runs this logic here. `nitropowerd` listens for the key and runs the chosen action (`nitropower-cli nitro-key turbo\|cycle\|gui\|none`) |
+| Quiet and eco return the fans to automatic, on the mode key | `ModeCycleConfig.FansAutoOn` | works |
+| Turbo (`acer_toggle_turbo`): turbo LED, fans at maximum, WMI overclock (settings 0x05 and 0x07) | `NitroController.SetTurbo`: the profile's top mode, the profile's fan setting, GPU overclock through NVML at that mode's level. Turning it off restores mode and fans | works as NitroPower's turbo (performance + fans at maximum + GPU +100/+200). The WMI overclock belongs to older Predator models, and this model's NitroSense uses NvAPI |
+| `turbo_sense/turbo_state` (turbo LED, with `sysfs_notify`) | `TurboSense`; `status`, `probe` and `watch` | absent: with `turbo_sense=1` the firmware reads 0 and the laptop has no turbo LED |
+| `fan_speed` (auto, maximum, CPU/GPU in %) | `NitroSenseDevice.SetFanSpeeds`; `nitropower-cli fan` | works |
+| `battery_limiter` (charge up to 80%) | `nitropower-cli battery-limit` | works |
+| `battery_calibration` | `nitropower-cli battery-calibration` | works |
+| `usb_charging` (0, 10, 20, 30%) | `nitropower-cli usb-charging` | works |
+| `backlight_timeout` (keyboard backlight off after 30 s) | `nitropower-cli keyboard-timeout` | works |
+| `lcd_override` (LCD overdrive) | `nitropower-cli lcd-overdrive` | the firmware returns `0xFF000001000000`, outside the expected values: probably unsupported |
+| `boot_animation_sound` | `nitropower-cli boot-sound` | the firmware returns status 1: probably unsupported |
+| `four_zoned_kb/four_zone_mode`: static, breathing, neon, wave, shifting, zoom, meteor and twinkling effects (speed, brightness, direction, color) | `FourZoneKeyboard`, `KeyboardEffectState` (the driver's validation rules); `nitropower-cli keyboard effect` | absent: with `four_zone_kb=1` the effect reads all zeros |
+| `four_zoned_kb/per_zone_mode`: color per zone + brightness | `PerZoneColors`; `nitropower-cli keyboard zones` | absent: the firmware returns status 1 (error) for all four zones |
+| State per power source (profile and fans on AC and on battery, in `/etc/predator_state`) | stays in the driver (WMI AC event) | works in the driver |
+| Keyboard state in `/etc/four_zone_kb_state` | stays in the driver | — |
+| hwmon (temperatures, fan RPM) | `Hwmon`, `SensorReader`; `probe` | works |
+| HID RGB controller (ENEK5130, `0CF2:5130`) | not ported: this model has no such device | absent |
 
-## Ferramentas de espaço de usuário
+## User-space tools
 
-| Ferramenta do Linuwu-Sense | No NitroPower |
-|---|---|
-| `Linuwu-Sense.py --status` e os ajustes | `nitropower-cli status` e os comandos de cada função |
-| `Linuwu-Sense.py --save/--load/--list-profiles` (perfis nomeados) | `nitropower-cli preset save/load/list/show/delete` em `/etc/nitropower/presets`. Também guarda modo, turbo e o overclock |
-| `profile-notifier.py` (notificação ao trocar de perfil) | `nitropower-cli watch --notify`. Usa `poll()` no `platform_profile` em vez de reler o arquivo, porque cada leitura é uma chamada SMI ao firmware |
-| `osd/linuwu_turbo_osd.py` (aviso de turbo) | o mesmo `watch --notify`: avisa turbo ligado e desligado, do NitroPower e do LED do firmware, e falhas da tecla Nitro (ex.: turbo na bateria). Inicia com a sessão (`/etc/xdg/autostart/nitropower-notify.desktop`) |
-| `osd/penguin_sense.py` (monitor de sensores) | `nitropower-cli probe` hoje; painel na interface gráfica (fase 3) |
+| Linuwu-Sense tool | In NitroPower |
+| --- | --- |
+| `Linuwu-Sense.py --status` and the settings | `nitropower-cli status` and the per-feature commands |
+| `Linuwu-Sense.py --save/--load/--list-profiles` (named profiles) | `nitropower-cli preset save/load/list/show/delete` in `/etc/nitropower/presets`. It also stores the mode, turbo and the overclock |
+| `profile-notifier.py` (notification on profile change) | `nitropower-cli watch --notify`. It uses `poll()` on `platform_profile` instead of re-reading the file, because every read is an SMI call into the firmware |
+| `osd/linuwu_turbo_osd.py` (turbo notification) | the same `watch --notify`: it reports turbo on and off, from NitroPower and from the firmware LED, and Nitro key failures (e.g. turbo on battery). It starts with the session (`/etc/xdg/autostart/nitropower-notify.desktop`) |
+| `osd/penguin_sense.py` (sensor monitor) | the Dashboard page of the interface; `nitropower-cli probe` on the command line |
 
-## Patch 0002: forçar turbo e teclado RGB
+## Patch 0002: forcing turbo and the RGB keyboard
 
-Dois parâmetros de módulo, para modelos que faltam na tabela de quirks (ou
-para sondar o hardware):
+Two module parameters, for models missing from the quirk table (or to probe the
+hardware):
 
-| Parâmetro | Valores | Efeito |
-|---|---|---|
-| `turbo_sense` | -1 (padrão do modelo), 0, 1 | quirk `turbo`: grupo `turbo_sense` e alternância de turbo pela tecla WMI |
-| `four_zone_kb` | -1, 0, 1 | quirk `four_zone_kb`: grupo `four_zoned_kb` |
+| Parameter | Values | Effect |
+| --- | --- | --- |
+| `turbo_sense` | -1 (model default), 0, 1 | `turbo` quirk: the `turbo_sense` group and turbo toggling from the WMI key |
+| `four_zone_kb` | -1, 0, 1 | `four_zone_kb` quirk: the `four_zoned_kb` group |
 
-Uso permanente: `options linuwu_sense four_zone_kb=1` em `/etc/modprobe.d/`.
-O NitroPower detecta os grupos pelo sysfs, então nada muda no aplicativo.
+To make it permanent: `options linuwu_sense four_zone_kb=1` in
+`/etc/modprobe.d/`. NitroPower detects the groups through sysfs, so nothing
+changes in the application.
 
-## Sondagem do ANV15-52 (BIOS V1.60, 2026-11-16)
+## ANV15-52 probe (BIOS V1.60, 2026-11-16)
 
-O driver foi carregado com `four_zone_kb=1 turbo_sense=1` e os arquivos foram
-só lidos:
+The driver was loaded with `four_zone_kb=1 turbo_sense=1` and the files were
+only read:
 
-| Arquivo | Resposta | Conclusão |
-|---|---|---|
-| `four_zoned_kb/four_zone_mode` | `0,0,0,0,0,0,0` | sem efeitos RGB |
-| `four_zoned_kb/per_zone_mode` | `1000000` em cada zona (resposta bruta 1 = erro) e brilho 0 | sem cor por zona |
-| `turbo_sense/turbo_state` | `0` | sem LED de turbo |
+| File | Response | Conclusion |
+| --- | --- | --- |
+| `four_zoned_kb/four_zone_mode` | `0,0,0,0,0,0,0` | no RGB effects |
+| `four_zoned_kb/per_zone_mode` | `1000000` for each zone (raw response 1 = error) and brightness 0 | no per-zone color |
+| `turbo_sense/turbo_state` | `0` | no turbo LED |
 
-O perfil marca `rgbKeyboard` e `turboLed` como `none`. Os comandos
-`keyboard effect`/`keyboard zones` continuam no NitroPower para os modelos que
-têm o recurso.
+The profile marks `rgbKeyboard` and `turboLed` as `none`. The
+`keyboard effect`/`keyboard zones` commands remain in NitroPower for models
+that have the feature.
 
-## Estado e arquivos do NitroPower
+## NitroPower state and files
 
-| Arquivo | Conteúdo |
-|---|---|
-| `/var/lib/nitropower/state.json` | turbo ativo e o que restaurar, último modo fora do turbo, overclock desligado pelo usuário |
-| `/etc/nitropower/presets/*.json` | presets nomeados |
+| File | Contents |
+| --- | --- |
+| `/var/lib/nitropower/state.json` | active turbo and what to restore, last mode outside turbo, overclock turned off by the user |
+| `/etc/nitropower/presets/*.json` | named presets |

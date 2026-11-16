@@ -1,73 +1,79 @@
 # NitroPower
 
-Central de controle para notebooks Acer Nitro no Linux: modos de desempenho,
-overclock da GPU, ventoinhas, bateria, teclado, tela e botão Nitro, em um
-único pacote.
+Control center for Acer Nitro laptops on Linux: performance modes, GPU
+overclock, fans, battery, keyboard, display and the Nitro key, in a single
+package.
 
-Não é afiliado à Acer. "Nitro" e "NitroSense" são marcas da Acer Inc.
+Not affiliated with Acer. "Nitro" and "NitroSense" are trademarks of Acer Inc.
 
-![Painel do NitroPower](docs/screenshots/dark-dashboard.png)
+![NitroPower dashboard](docs/screenshots/dark-dashboard.png)
 
 ## Interface
 
-`nitropower` (ou NitroPower no menu de aplicativos) abre a janela. Ela fala com
-o `nitropowerd`, então não pede senha.
+`nitropower` (or NitroPower in the application menu) opens the window. It talks
+to `nitropowerd`, so it does not ask for a password.
 
-| Página | O que faz |
-|---|---|
-| Painel | Temperaturas, ventoinhas, uso e frequência de CPU e GPU ao vivo, com gráficos dos últimos 2 minutos; troca de modo, turbo e ventoinhas com um clique |
-| Desempenho | Modos de operação, turbo (o que liga e para onde volta), ciclo da tecla de modo, overclock da GPU com níveis editáveis por modo |
-| Ventoinhas | Automático, máximo, velocidade fixa ou curva própria, com editor gráfico (arrastar, adicionar, remover pontos) e modelos prontos |
-| Bateria | Carga, potência, tempo restante, saúde e ciclos; limite de 80%, calibração e carga USB com o notebook desligado |
-| Teclado e tela | Luz do teclado, overdrive da tela, som ao ligar e teclado RGB de 4 zonas (efeitos e cor por zona, com prévia) |
-| Tecla Nitro | Turbo, trocar modo, abrir o NitroPower ou nada; teste da tecla |
-| Perfis | Salvar e aplicar conjuntos de ajustes |
-| Sistema | Modelo, BIOS, drivers, parâmetros do `linuwu_sense`, registros do serviço; idioma, tema, bandeja e início com a sessão |
+| Page | What it does |
+| --- | --- |
+| Dashboard | Live temperatures, fan speeds, CPU and GPU load and clocks, with charts of the last 2 minutes; one-click mode, turbo and fan control |
+| Performance | Operating modes, turbo (what it turns on and what it restores), mode key cycle, GPU overclock with editable levels per mode |
+| Fans | Automatic, maximum, fixed speed or a custom curve, with a graphical editor (drag, add and remove points) and ready-made templates |
+| Battery | Charge, power draw, time remaining, health and cycles; 80% charge limit, calibration and USB charging while powered off |
+| Keyboard & display | Keyboard backlight, display overdrive, boot sound and 4-zone RGB keyboard (effects and per-zone color, with a preview) |
+| Nitro key | Turbo, cycle modes, open NitroPower or nothing; key test |
+| Presets | Save and apply sets of settings |
+| System | Model, BIOS, drivers, `linuwu_sense` parameters, service logs; language, theme, tray and start with the session |
 
-Também tem ícone na bandeja (modos, turbo e ventoinhas), português e inglês,
-tema escuro e claro. `nitropower --demo` mostra a interface com hardware de
-mentira. Mais capturas em [`docs/screenshots/`](docs/screenshots/).
+It also has a tray icon (modes, turbo and fans), English and Brazilian
+Portuguese, and dark and light themes. `nitropower --demo` shows the interface
+with simulated hardware. More screenshots in
+[`docs/screenshots/`](docs/screenshots/).
 
-## Instalação (desenvolvimento)
+| Performance | Fans |
+| --- | --- |
+| ![Performance page](docs/screenshots/dark-performance.png) | ![Fans page](docs/screenshots/dark-fans.png) |
+
+## Installation (development)
 
 ```bash
-packaging/build.sh                              # como usuário: testes + publicação em artifacts/
-sudo packaging/install-dev.sh --replace-damx    # daemon, CLI, interface, avisos na sessão
+packaging/build.sh                              # as your user: tests + publish to artifacts/
+sudo packaging/install-dev.sh --replace-damx    # daemon, CLI, interface, session notifications
 sudo packaging/install-dev.sh remove
 ```
 
-O instalador desativa o `nitro-gpu-oc` e o atalho do GNOME da tecla Nitro, que
-o `nitropowerd` substitui, e devolve os dois no `remove`. Com `--replace-damx`
-ele também desliga o daemon do DAMX e esconde o atalho dele. Depois de
-instalar, saia e entre na sessão uma vez para entrar no grupo `nitropower`
-(interface e CLI sem sudo).
+The installer disables `nitro-gpu-oc` and the GNOME shortcut for the Nitro key,
+which `nitropowerd` replaces, and restores both on `remove`. With
+`--replace-damx` it also stops the DAMX daemon and hides its launcher. After
+installing, log out and back in once to join the `nitropower` group (interface
+and CLI without sudo).
 
-## Linha de comando
+## Command line
 
 ```bash
-nitropower-cli status                 # tudo de uma vez (sem root)
+nitropower-cli status                 # everything at once (no root)
 nitropower-cli mode performance       # eco | quiet | balanced | performance
-nitropower-cli turbo toggle           # modo máximo + ventoinhas no máximo
-nitropower-cli nitro-key cycle        # tecla Nitro: turbo | cycle | gui | none
-nitropower-cli fan 60 70              # ventoinhas CPU/GPU em %; auto | max
+nitropower-cli turbo toggle           # top mode + fans at maximum
+nitropower-cli nitro-key cycle        # Nitro key: turbo | cycle | gui | none
+nitropower-cli fan 60 70              # CPU/GPU fans in %; auto | max
 nitropower-cli fan curve set cpu 45:25,60:40,75:65,88:100
-nitropower-cli gpu-oc levels 0/0 0/0 100/200   # overclock por nível (núcleo/memória)
-nitropower-cli battery-limit on       # carga até 80%
+nitropower-cli gpu-oc levels 0/0 0/0 100/200   # overclock per level (core/memory)
+nitropower-cli battery-limit on       # charge up to 80%
 nitropower-cli keyboard effect wave --speed 5 --direction ltr
-nitropower-cli preset save jogo       # e depois: preset load jogo
-nitropower-cli watch --notify         # avisos de modo, turbo e tecla Nitro
+nitropower-cli preset save gaming     # then: preset load gaming
+nitropower-cli watch --notify         # notifications for mode, turbo and the Nitro key
 ```
 
-Com o `nitropowerd` rodando, quem está no grupo `nitropower` não precisa de
-sudo. Sem o daemon, os comandos agem direto no hardware e alterações pedem sudo.
-`nitropower-cli help` lista todos os comandos.
+While `nitropowerd` is running, members of the `nitropower` group do not need
+sudo. Without the daemon, commands act on the hardware directly and changes
+require sudo. `nitropower-cli help` lists every command.
 
-## Documentação
+## Documentation
 
-- [Linuwu-Sense no NitroPower](docs/LINUWU-SENSE.md)
-- [Atualizar a BIOS pelo Linux](docs/BIOS.md)
-- [API do nitropowerd](docs/API.md)
-- [Arquitetura e roteiro](docs/ARQUITETURA.md)
-- Modelos suportados: veja [`profiles/`](profiles/)
+- [Linuwu-Sense in NitroPower](docs/LINUWU-SENSE.md)
+- [Updating the BIOS from Linux](docs/BIOS.md)
+- [nitropowerd API](docs/API.md)
+- [Architecture and roadmap](docs/ARCHITECTURE.md)
+- [Changelog](CHANGELOG.md)
+- Supported models: see [`profiles/`](profiles/)
 
-Licença: GPL-3.0-or-later. O driver em `driver/` é GPL-2.0-or-later.
+License: GPL-3.0-or-later. The driver in `driver/` is GPL-2.0-or-later.

@@ -1,49 +1,49 @@
-# API do nitropowerd
+# nitropowerd API
 
-- Socket Unix `/run/nitropower/nitropower.sock`, `root:nitropower` 0660.
-- JSON-RPC 2.0, uma mensagem JSON por linha (UTF-8, `\n` no fim).
-- Nomes de campos em camelCase; enums como texto (`"turbo"`, `"applied"`).
-- Versão do protocolo: `system.version` → `protocol` (hoje 1). Métodos novos não
-  mudam a versão; mudanças incompatíveis mudam.
-- Clientes em C#: `NitroPower.Core.Api.NitroClient` (implementa `INitroApi`).
-- Limites: requisição de até 64 KiB (passou disso, a conexão é fechada), até
-  32 conexões ao mesmo tempo, e um assinante de eventos que não lê por 2 s é
-  desconectado.
+- Unix socket `/run/nitropower/nitropower.sock`, `root:nitropower` 0660.
+- JSON-RPC 2.0, one JSON message per line (UTF-8, terminated by `\n`).
+- Field names in camelCase; enums as strings (`"turbo"`, `"applied"`).
+- Protocol version: `system.version` → `protocol` (currently 1). New methods do
+  not change the version; incompatible changes do.
+- C# clients: `NitroPower.Core.Api.NitroClient` (implements `INitroApi`).
+- Limits: requests of up to 64 KiB (anything larger closes the connection), up
+  to 32 simultaneous connections, and an event subscriber that does not read
+  for 2 s is disconnected.
 
 ```bash
 echo '{"jsonrpc":"2.0","id":1,"method":"status.get"}' | socat - UNIX-CONNECT:/run/nitropower/nitropower.sock
 ```
 
-## Métodos
+## Methods
 
-| Método | Parâmetros | Resultado |
-|---|---|---|
+| Method | Parameters | Result |
+| --- | --- | --- |
 | `system.version` | — | `{version, protocol, daemon}` |
-| `status.get` | — | `NitroStatus`: modo, modos, turbo, ventoinhas, curva, recursos, carga USB, teclado, GPU, tecla Nitro. Custa várias chamadas ao firmware: pedir sob demanda e após eventos |
-| `sensors.get` | — | temperaturas, RPM, uso/frequência da CPU, telemetria da GPU (cache de 3 s) |
-| `mode.set` | `{mode}` | `ModeChange` (`"turbo"` em modelo sem modo turbo = ligar o turbo) |
-| `mode.next` | — | `ModeChange`: próximo modo do ciclo |
+| `status.get` | — | `NitroStatus`: mode, modes, turbo, fans, curve, features, USB charging, keyboard, GPU, Nitro key. It costs several firmware calls: request it on demand and after events |
+| `sensors.get` | — | temperatures, RPM, CPU load/clocks, GPU telemetry (3 s cache) |
+| `mode.set` | `{mode}` | `ModeChange` (`"turbo"` on a model without a turbo mode = turn turbo on) |
+| `mode.next` | — | `ModeChange`: next mode in the cycle |
 | `turbo.set` | `{on}` | `ModeChange` |
 | `turbo.toggle` | — | `ModeChange` |
 | `fans.set` | `{choice}`: `auto`, `max`, `"cpu,gpu"`, `curve` | — |
-| `fans.curve.set` | `{cpu:[{tempC,percent}], gpu:[...]}` | — (valida e ativa a curva) |
+| `fans.curve.set` | `{cpu:[{tempC,percent}], gpu:[...]}` | — (validates and enables the curve) |
 | `feature.set` | `{feature, enabled}`: `batteryLimiter`, `batteryCalibration`, `keyboardTimeout`, `lcdOverdrive`, `bootSound` | — |
 | `usbCharging.set` | `{threshold}`: 0, 10, 20, 30 | — |
 | `keyboard.effect.set` | `{effect:{effect, speed, brightness, direction, color:{r,g,b}}}` | — |
 | `keyboard.zones.set` | `{zones:{zone1..zone4:{r,g,b}, brightness}}` | — |
 | `gpu.overclock.set` | `{enabled}` | `GpuApplyResult` |
 | `gpu.overclock.apply` | — | `GpuApplyResult` |
-| `gpu.levels.set` | `{levels:[{core, mem}, ...]}` um por nível do perfil; núcleo -300..300, memória -1000..1500 | `GpuApplyResult` (guardado em `state.json`, aplicado já) |
-| `gpu.levels.reset` | — | `GpuApplyResult` (volta aos níveis do perfil) |
+| `gpu.levels.set` | `{levels:[{core, mem}, ...]}`, one per profile level; core -300..300, memory -1000..1500 | `GpuApplyResult` (saved in `state.json` and applied at once) |
+| `gpu.levels.reset` | — | `GpuApplyResult` (back to the profile's levels) |
 | `nitroKey.set` | `{action}`: `turbo`, `cycle`, `gui`, `none` | — |
-| `nitroKey.press` | — | `ModeChange` ou `null` |
+| `nitroKey.press` | — | `ModeChange` or `null` |
 | `modeKey.set` | `{behavior}`: `cycle`, `turbo` | — |
-| `preset.list` / `preset.get` / `preset.save` / `preset.load` / `preset.delete` | `{name}` | nomes / `Preset` / — / `[PresetResult]` / `bool` |
-| `events.subscribe` | — | `true`; a conexão passa a receber eventos |
+| `preset.list` / `preset.get` / `preset.save` / `preset.load` / `preset.delete` | `{name}` | names / `Preset` / — / `[PresetResult]` / `bool` |
+| `events.subscribe` | — | `true`; the connection starts receiving events |
 
 `ModeChange`: `{from, to, fans, gpu:{status, offsets, detail}, turbo, changed}`.
 
-Partes de `NitroStatus` usadas pela interface:
+Parts of `NitroStatus` used by the interface:
 
 - `modes[]`: `{id, platformProfile, requiresAc, gpuOcLevel}`;
 - `modeCycle`: `{ac[], battery[], fansAutoOn[]}`;
@@ -51,24 +51,24 @@ Partes de `NitroStatus` usadas pela interface:
   levels[], profileLevels[], policy:{acOnly, batteryResumePercent,
   batteryStopPercent}, customLevels}`.
 
-## Erros
+## Errors
 
-| Código | Significado |
-|---|---|
-| -32700, -32600, -32601, -32602 | JSON inválido, pedido inválido, método inexistente, parâmetro inválido |
-| -32000 | Pedido impossível neste modelo; `message` é para o usuário (ex.: "turbo needs AC power") |
-| -32001 | O driver recusou a escrita |
-| -32002 | Sem permissão |
+| Code | Meaning |
+| --- | --- |
+| -32700, -32600, -32601, -32602 | Parse error, invalid request, method not found, invalid params |
+| -32000 | Not possible on this model; `message` is meant for the user (e.g. "turbo needs AC power") |
+| -32001 | The driver refused the write |
+| -32002 | Permission denied |
 
-## Eventos
+## Events
 
-Depois de `events.subscribe`, chegam notificações
+After `events.subscribe`, notifications arrive as
 `{"jsonrpc":"2.0","method":"event","params":{...}}`:
 
-| `type` | Campos | Quando |
-|---|---|---|
-| `mode` | `mode`, `turbo` | o `platform_profile` mudou (por qualquer origem) |
-| `power` | `onAc`, `batteryPercent` | tomada ligada ou desligada |
-| `nitroKey` | `action`, `mode`, `turbo`, `message` | tecla Nitro; `message` quando a ação falhou |
-| `firmwareTurbo` | `turbo` | LED de turbo do firmware (modelos com `turbo_sense`) |
-| `changed` | `method` | depois de cada chamada que altera algo |
+| `type` | Fields | When |
+| --- | --- | --- |
+| `mode` | `mode`, `turbo` | `platform_profile` changed (from any source) |
+| `power` | `onAc`, `batteryPercent` | AC plugged in or unplugged |
+| `nitroKey` | `action`, `mode`, `turbo`, `message` | Nitro key; `message` when the action failed |
+| `firmwareTurbo` | `turbo` | firmware turbo LED (models with `turbo_sense`) |
+| `changed` | `method` | after every call that changes something |
