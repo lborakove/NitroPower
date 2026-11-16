@@ -1,0 +1,154 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             xmlns:l="using:NitroPower.Gui.Localization"
+             x:Class="NitroPower.Gui.Views.SystemView"
+             x:DataType="vm:SystemViewModel">
+  <StackPanel Spacing="16">
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="h2" Text="{l:Tr sys.machine}" />
+            <Button Grid.Column="1" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:Tr common.refresh}">
+              <c:Icon Data="{DynamicResource ico.refresh}" Width="16" Height="16" />
+            </Button>
+          </Grid>
+          <ItemsControl ItemsSource="{Binding Machine}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:InfoRow">
+                <Grid ColumnDefinitions="130,*" Margin="0,4">
+                  <TextBlock Classes="dim" Text="{Binding Label}" />
+                  <SelectableTextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="card">
+        <StackPanel Spacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Image Source="/Assets/nitropower-64.png" Width="28" Height="28" />
+            <TextBlock Classes="h2" Text="NitroPower" VerticalAlignment="Center" />
+          </StackPanel>
+          <ItemsControl ItemsSource="{Binding Software}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:InfoRow">
+                <Grid ColumnDefinitions="130,*" Margin="0,4">
+                  <TextBlock Classes="dim" Text="{Binding Label}" />
+                  <SelectableTextBlock Grid.Column="1" Text="{Binding Value}" TextWrapping="Wrap" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Border Classes="divider" Margin="0,4" />
+          <TextBlock Classes="caption" Text="{l:Tr sys.about}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <Border Classes="card">
+      <StackPanel Spacing="12">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.server}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="12,0,16,0" VerticalAlignment="Center">
+            <TextBlock Classes="h2" Text="{l:Tr sys.driverTitle}" />
+            <TextBlock Classes="caption" Text="{l:Tr sys.driverDesc}" />
+          </StackPanel>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Button Classes="ghost" Command="{Binding LoadLogsCommand}" IsEnabled="{Binding !LogsLoading}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:Icon Data="{DynamicResource ico.layers}" Width="16" Height="16" />
+                <TextBlock Text="{l:Tr sys.logs}" />
+              </StackPanel>
+            </Button>
+            <Button Classes="ghost" Command="{Binding HideLogsCommand}" IsVisible="{Binding HasLogs}" Content="{l:Tr sys.logs.hide}" />
+          </StackPanel>
+        </Grid>
+        <ItemsControl ItemsSource="{Binding DriverParameters}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><UniformGrid Columns="3" ColumnSpacing="24" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:InfoRow">
+              <Grid ColumnDefinitions="*,Auto" Margin="0,3">
+                <TextBlock Classes="dim" Text="{Binding Label}" FontFamily="monospace" FontSize="12" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="{Binding Value}" FontFamily="monospace" FontSize="12" Margin="8,0,0,0" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Border Classes="inset" IsVisible="{Binding HasLogs}" Padding="0">
+          <ScrollViewer MaxHeight="320" HorizontalScrollBarVisibility="Auto">
+            <SelectableTextBlock Text="{Binding Logs}" FontFamily="monospace" FontSize="11.5" Margin="12" />
+          </ScrollViewer>
+        </Border>
+      </StackPanel>
+    </Border>
+
+    <Border Classes="card">
+      <StackPanel Spacing="4">
+        <TextBlock Classes="h2" Text="{l:Tr settings.title}" Margin="0,0,0,10" />
+
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.globe}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="14,0,16,0" VerticalAlignment="Center">
+            <TextBlock Classes="h3" Text="{l:Tr settings.language}" />
+            <TextBlock Classes="caption" Text="{l:Tr settings.language.desc}" />
+          </StackPanel>
+          <ComboBox Grid.Column="2" Width="220" ItemsSource="{Binding Languages}" SelectedItem="{Binding Language}" VerticalAlignment="Center">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:Choice"><TextBlock Text="{Binding Label}" /></DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </Grid>
+        <Border Classes="divider" />
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.contrast}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="14,0,16,0" VerticalAlignment="Center">
+            <TextBlock Classes="h3" Text="{l:Tr settings.theme}" />
+            <TextBlock Classes="caption" Text="{l:Tr settings.theme.desc}" />
+          </StackPanel>
+          <ComboBox Grid.Column="2" Width="220" ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme}" VerticalAlignment="Center">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:Choice"><TextBlock Text="{Binding Label}" /></DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </Grid>
+        <Border Classes="divider" />
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.clock}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="14,0,16,0" VerticalAlignment="Center">
+            <TextBlock Classes="h3" Text="{l:Tr settings.refresh}" />
+            <TextBlock Classes="caption" Text="{l:Tr settings.refresh.desc}" />
+          </StackPanel>
+          <ComboBox Grid.Column="2" Width="220" ItemsSource="{Binding Intervals}" SelectedItem="{Binding Interval}" VerticalAlignment="Center">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:Choice"><TextBlock Text="{Binding Label}" /></DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </Grid>
+        <Border Classes="divider" />
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.window}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="14,0,16,0" VerticalAlignment="Center">
+            <TextBlock Classes="h3" Text="{l:Tr settings.tray}" />
+            <TextBlock Classes="caption" Text="{l:Tr settings.tray.desc}" />
+          </StackPanel>
+          <ToggleSwitch Grid.Column="2" IsChecked="{Binding CloseToTray}" VerticalAlignment="Center" />
+        </Grid>
+        <Border Classes="divider" />
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.play}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="14,0,16,0" VerticalAlignment="Center">
+            <TextBlock Classes="h3" Text="{l:Tr settings.autostart}" />
+            <TextBlock Classes="caption" Text="{l:Tr settings.autostart.desc}" />
+          </StackPanel>
+          <ToggleSwitch Grid.Column="2" IsChecked="{Binding StartAtLogin}" VerticalAlignment="Center" />
+        </Grid>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

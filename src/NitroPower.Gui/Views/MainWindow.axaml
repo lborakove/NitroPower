@@ -1,0 +1,151 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NitroPower.Gui.ViewModels"
+        xmlns:c="using:NitroPower.Gui.Controls"
+        xmlns:l="using:NitroPower.Gui.Localization"
+        x:Class="NitroPower.Gui.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="NitroPower"
+        Icon="/Assets/nitropower-256.png"
+        Width="1220" Height="800" MinWidth="1000" MinHeight="640"
+        WindowStartupLocation="CenterScreen">
+  <Grid>
+    <Grid ColumnDefinitions="232,*">
+      <!-- Sidebar -->
+      <Border Background="{DynamicResource Np.Sidebar}" BorderBrush="{DynamicResource Np.Border}" BorderThickness="0,0,1,0">
+        <DockPanel Margin="14,18,14,14">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="11" Margin="6,0,0,24">
+            <Image Source="/Assets/nitropower-64.png" Width="36" Height="36" />
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="NitroPower" FontSize="16.5" FontWeight="Bold" />
+              <TextBlock Text="{Binding ModelText}" Classes="caption" FontSize="11" TextWrapping="NoWrap"
+                         TextTrimming="CharacterEllipsis" MaxWidth="150" />
+            </StackPanel>
+          </StackPanel>
+
+          <Border DockPanel.Dock="Bottom" Classes="inset" Padding="11,9">
+            <Grid ColumnDefinitions="Auto,*">
+              <Panel VerticalAlignment="Top" Margin="0,5,0,0">
+                <Ellipse Width="8" Height="8" Fill="{DynamicResource Np.Ok}" IsVisible="{Binding LinkOk}" />
+                <Ellipse Width="8" Height="8" Fill="{DynamicResource Np.Warning}" IsVisible="{Binding !LinkOk}" />
+              </Panel>
+              <StackPanel Grid.Column="1" Margin="9,0,0,0" Spacing="1">
+                <TextBlock Text="{Binding LinkText}" FontSize="12" FontWeight="Medium" />
+                <TextBlock Text="{Binding VersionText}" Classes="faint" FontSize="11" />
+              </StackPanel>
+            </Grid>
+          </Border>
+
+          <ListBox Classes="nav" ItemsSource="{Binding Pages}" SelectedItem="{Binding CurrentPage}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:PageViewModel">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                  <c:Icon Data="{Binding Icon}" />
+                  <TextBlock Text="{Binding Title}" VerticalAlignment="Center" FontWeight="Medium" />
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
+
+      <!-- Page -->
+      <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*">
+        <Grid Margin="28,22,28,14" ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="2">
+            <TextBlock Classes="h1" Text="{Binding CurrentPage.Title}" />
+            <TextBlock Classes="caption" Text="{Binding CurrentPage.Subtitle}" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"
+                      IsVisible="{Binding HasStatus}">
+            <Border Classes="chip" Background="{Binding ModeSoftBrush}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <c:Icon Data="{Binding ModeIcon}" Foreground="{Binding ModeBrush}" Width="15" Height="15" />
+                <TextBlock Text="{Binding ModeText}" FontWeight="SemiBold" FontSize="12.5" />
+              </StackPanel>
+            </Border>
+            <Border Classes="chip" Background="{DynamicResource Np.Track}"
+                    IsVisible="{Binding GpuOcText, Converter={x:Static ObjectConverters.IsNotNull}}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <c:Icon Data="{DynamicResource ico.chip}" Width="15" Height="15" />
+                <TextBlock Text="{Binding GpuOcText}" FontSize="12.5" />
+              </StackPanel>
+            </Border>
+            <Border Classes="chip" Background="{DynamicResource Np.Track}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <c:Icon Data="{DynamicResource ico.fan}" Width="15" Height="15" />
+                <TextBlock Text="{Binding FansText}" FontSize="12.5" />
+              </StackPanel>
+            </Border>
+            <Border Classes="chip" Background="{DynamicResource Np.Track}">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <c:Icon Data="{Binding PowerIcon}" Width="15" Height="15" />
+                <TextBlock Text="{Binding PowerText}" FontSize="12.5" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Classes="notice" Margin="28,0,28,14" IsVisible="{Binding ShowBanner}">
+          <Grid ColumnDefinitions="Auto,*">
+            <c:Icon Data="{DynamicResource ico.warning}" Foreground="{DynamicResource Np.Warning}" Width="20" Height="20"
+                    VerticalAlignment="Top" />
+            <StackPanel Grid.Column="1" Margin="12,0,0,0" Spacing="4">
+              <TextBlock Text="{Binding BannerTitle}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding BannerText}" Classes="caption" />
+              <SelectableTextBlock Text="{Binding BannerCommand}" FontFamily="monospace" Margin="0,4,0,0"
+                                   IsVisible="{Binding BannerCommand, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+          <ContentControl Content="{Binding CurrentPage}" Margin="28,0,28,28" />
+        </ScrollViewer>
+      </Grid>
+    </Grid>
+
+    <!-- Toasts -->
+    <ItemsControl Name="Toasts" ItemsSource="{Binding Toasts}" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                  Margin="24" MaxWidth="460">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:ToastItem">
+          <Border Background="{DynamicResource Np.Toast}" BorderBrush="{DynamicResource Np.Border}" BorderThickness="1"
+                  CornerRadius="12" Padding="14,10,8,10" Margin="0,8,0,0" BoxShadow="0 10 30 0 #50000000">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <c:Icon Data="{DynamicResource ico.check}" Foreground="{DynamicResource Np.Ok}" IsVisible="{Binding !IsError}"
+                      VerticalAlignment="Top" Margin="0,1,0,0" />
+              <c:Icon Data="{DynamicResource ico.warning}" Foreground="{DynamicResource Np.Danger}" IsVisible="{Binding IsError}"
+                      VerticalAlignment="Top" Margin="0,1,0,0" />
+              <TextBlock Grid.Column="1" Text="{Binding Text}" TextWrapping="Wrap" Margin="10,0" VerticalAlignment="Center" />
+              <Button Grid.Column="2" Classes="icon" VerticalAlignment="Top" Padding="4"
+                      Command="{Binding #Toasts.((vm:MainViewModel)DataContext).DismissToastCommand}"
+                      CommandParameter="{Binding}">
+                <c:Icon Data="{DynamicResource ico.close}" Width="13" Height="13" />
+              </Button>
+            </Grid>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <!-- Confirmation -->
+    <Border Background="{DynamicResource Np.Overlay}"
+            IsVisible="{Binding Confirm, Converter={x:Static ObjectConverters.IsNotNull}}">
+      <Border Classes="card" Width="460" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="22"
+              BoxShadow="0 20 60 0 #70000000">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="h2" Text="{Binding Confirm.Title}" TextWrapping="Wrap" />
+          <TextBlock Classes="caption" FontSize="13" Text="{Binding Confirm.Text}" />
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,12,0,0">
+            <Button Classes="ghost" Content="{l:Tr common.cancel}" Command="{Binding AnswerCommand}" CommandParameter="no" />
+            <Button Classes="primary" Content="{Binding Confirm.ConfirmText}" Command="{Binding AnswerCommand}"
+                    CommandParameter="yes" IsVisible="{Binding !Confirm.IsDanger}" />
+            <Button Classes="danger" Content="{Binding Confirm.ConfirmText}" Command="{Binding AnswerCommand}"
+                    CommandParameter="yes" IsVisible="{Binding Confirm.IsDanger}" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+  </Grid>
+</Window>

@@ -1,0 +1,140 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:v="using:NitroPower.Gui.Views"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             xmlns:l="using:NitroPower.Gui.Localization"
+             x:Class="NitroPower.Gui.Views.DeviceView"
+             x:DataType="vm:DeviceViewModel">
+  <StackPanel Spacing="16">
+    <Border Classes="card">
+      <StackPanel>
+        <TextBlock Classes="h2" Text="{l:Tr device.options}" Margin="0,0,0,14" />
+        <v:FeatureRow DataContext="{Binding KeyboardTimeout}" />
+        <Border Classes="divider" />
+        <v:FeatureRow DataContext="{Binding LcdOverdrive}" />
+        <Border Classes="divider" />
+        <v:FeatureRow DataContext="{Binding BootSound}" />
+      </StackPanel>
+    </Border>
+
+    <!-- RGB keyboard -->
+    <Border Classes="card" IsVisible="{Binding HasRgb}">
+      <StackPanel Spacing="14">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.palette}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+            <TextBlock Classes="h2" Text="{l:Tr rgb.title}" />
+            <TextBlock Classes="caption" Text="{l:Tr rgb.desc}" />
+          </StackPanel>
+          <Border Grid.Column="2" Classes="segbar" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+              <Button Classes="seg" Classes.on="{Binding EditingEffect}" Content="{l:Tr rgb.effects}" Command="{Binding EditTabCommand}" CommandParameter="effect" />
+              <Button Classes="seg" Classes.on="{Binding EditingZones}" Content="{l:Tr rgb.zones}" Command="{Binding EditTabCommand}" CommandParameter="zones" />
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <c:KeyboardPreview Height="190" FrameBrush="{DynamicResource Np.Keyboard}" Zone1="{Binding PreviewZone1}"
+                           Zone2="{Binding PreviewZone2}" Zone3="{Binding PreviewZone3}" Zone4="{Binding PreviewZone4}"
+                           Brightness="{Binding PreviewBrightness}" />
+
+        <!-- Effect -->
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="24" IsVisible="{Binding EditingEffect}">
+          <StackPanel Spacing="12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{l:Tr rgb.effect}" />
+              <ComboBox ItemsSource="{Binding Effects}" SelectedItem="{Binding SelectedEffect}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:EffectOption"><TextBlock Text="{Binding Name}" /></DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+            <StackPanel Spacing="4" IsVisible="{Binding UsesSpeed}">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="label" Text="{l:Tr rgb.speed}" />
+                <TextBlock Grid.Column="1" Text="{Binding Speed}" FontWeight="SemiBold" />
+              </Grid>
+              <Slider Minimum="1" Maximum="9" Value="{Binding Speed}" IsSnapToTickEnabled="True" TickFrequency="1" />
+            </StackPanel>
+            <StackPanel Spacing="4">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="label" Text="{l:Tr rgb.brightness}" />
+                <TextBlock Grid.Column="1" Text="{Binding Brightness, StringFormat={}{0}%}" FontWeight="SemiBold" />
+              </Grid>
+              <Slider Minimum="0" Maximum="100" Value="{Binding Brightness}" IsSnapToTickEnabled="True" TickFrequency="1" />
+            </StackPanel>
+            <StackPanel Spacing="6" IsVisible="{Binding UsesDirection}">
+              <TextBlock Classes="label" Text="{l:Tr rgb.direction}" />
+              <CheckBox IsChecked="{Binding RightToLeft}" Content="{l:Tr rgb.rightToLeft}" />
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Spacing="10">
+            <StackPanel Spacing="6" IsVisible="{Binding UsesColor}">
+              <TextBlock Classes="label" Text="{l:Tr rgb.color}" />
+              <ColorView Color="{Binding EffectColor}" IsAlphaVisible="False" IsAccentColorsVisible="False"
+                         IsColorPaletteVisible="True" Height="300" />
+            </StackPanel>
+            <TextBlock Classes="caption" Text="{l:Tr rgb.ownColors}" IsVisible="{Binding !UsesColor}" />
+            <Button Classes="primary" Command="{Binding ApplyEffectCommand}" HorizontalAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:Icon Data="{DynamicResource ico.check}" Width="16" Height="16" />
+                <TextBlock Text="{l:Tr rgb.apply}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+
+        <!-- Zones -->
+        <StackPanel Spacing="12" IsVisible="{Binding EditingZones}">
+          <UniformGrid Columns="4" ColumnSpacing="12">
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{l:Tr rgb.zone1}" />
+              <ColorPicker Color="{Binding Zone1}" IsAlphaVisible="False" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{l:Tr rgb.zone2}" />
+              <ColorPicker Color="{Binding Zone2}" IsAlphaVisible="False" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{l:Tr rgb.zone3}" />
+              <ColorPicker Color="{Binding Zone3}" IsAlphaVisible="False" HorizontalAlignment="Stretch" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Classes="label" Text="{l:Tr rgb.zone4}" />
+              <ColorPicker Color="{Binding Zone4}" IsAlphaVisible="False" HorizontalAlignment="Stretch" />
+            </StackPanel>
+          </UniformGrid>
+          <StackPanel Spacing="4" MaxWidth="420" HorizontalAlignment="Left">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="{l:Tr rgb.brightness}" />
+              <TextBlock Grid.Column="1" Text="{Binding ZoneBrightness, StringFormat={}{0}%}" FontWeight="SemiBold" />
+            </Grid>
+            <Slider Minimum="0" Maximum="100" Value="{Binding ZoneBrightness}" IsSnapToTickEnabled="True" TickFrequency="1" Width="420" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Classes="primary" Command="{Binding ApplyZonesCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:Icon Data="{DynamicResource ico.check}" Width="16" Height="16" />
+                <TextBlock Text="{l:Tr rgb.apply}" />
+              </StackPanel>
+            </Button>
+            <Button Classes="ghost" Content="{l:Tr rgb.sameColor}" Command="{Binding SameColorCommand}" />
+          </StackPanel>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <Border Classes="card" IsVisible="{Binding !HasRgb}">
+      <Grid ColumnDefinitions="Auto,*">
+        <Border Classes="bubble" Background="{DynamicResource Np.Track}" TextElement.Foreground="{DynamicResource Np.TextDim}">
+          <c:Icon Data="{DynamicResource ico.palette}" Width="19" Height="19" />
+        </Border>
+        <StackPanel Grid.Column="1" Margin="14,0,0,0" Spacing="2" VerticalAlignment="Center">
+          <TextBlock Classes="h3" Text="{l:Tr rgb.none}" />
+          <TextBlock Classes="caption" Text="{l:Tr rgb.none.desc}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Renders every page of the GUI in demo mode to PNG files, without a display
+       (docs screenshots and visual checks). Usage: dotnet run with the output directory as argument. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" Version="12.1.5" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NitroPower.Gui\NitroPower.Gui.csproj" />
+  </ItemGroup>
+
+</Project>

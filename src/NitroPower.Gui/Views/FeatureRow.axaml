@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             x:Class="NitroPower.Gui.Views.FeatureRow"
+             x:DataType="vm:FeatureToggle">
+  <Grid ColumnDefinitions="Auto,*,Auto">
+    <Border Classes="bubble" VerticalAlignment="Top">
+      <c:Icon Data="{Binding Icon}" Width="19" Height="19" />
+    </Border>
+    <StackPanel Grid.Column="1" Margin="14,0,16,0" Spacing="2" VerticalAlignment="Center">
+      <TextBlock Classes="h3" Text="{Binding Title}" />
+      <TextBlock Classes="caption" Text="{Binding Description}" />
+      <TextBlock Classes="caption warning" Text="{Binding Note}" Margin="0,2,0,0"
+                 IsVisible="{Binding Note, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    </StackPanel>
+    <ToggleSwitch Grid.Column="2" IsChecked="{Binding IsOn}" IsEnabled="{Binding CanChange}" VerticalAlignment="Center" />
+  </Grid>
+</UserControl>

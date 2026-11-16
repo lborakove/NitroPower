@@ -1,0 +1,206 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             xmlns:l="using:NitroPower.Gui.Localization"
+             x:Class="NitroPower.Gui.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+  <Grid ColumnDefinitions="*,300" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="16" RowSpacing="16">
+
+    <!-- Gauges -->
+    <UniformGrid Grid.ColumnSpan="2" Columns="4" ColumnSpacing="16">
+      <Border Classes="card" Padding="14,16">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="label" Text="{l:Tr dash.cpu}" />
+            <c:Icon Grid.Column="1" Data="{DynamicResource ico.chip}" Width="15" Height="15" Foreground="{DynamicResource Np.TextFaint}" />
+          </Grid>
+          <Grid Width="116" Height="116" HorizontalAlignment="Center">
+            <c:ArcGauge Value="{Binding CpuTemp}" Maximum="100" HotThreshold="90" ValueBrush="#38BDF8" Thickness="10" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="{Binding CpuTempText}" FontSize="21" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock Text="{l:Tr dash.temperature}" Classes="faint" FontSize="11" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+          <StackPanel Spacing="2" HorizontalAlignment="Center">
+            <TextBlock HorizontalAlignment="Center" FontWeight="SemiBold">
+              <Run Text="{l:Tr dash.usage}" /><Run Text=" " /><Run Text="{Binding CpuLoadText}" />
+            </TextBlock>
+            <TextBlock Classes="caption" Text="{Binding CpuFreqText}" HorizontalAlignment="Center" TextAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" Padding="14,16">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="label" Text="{l:Tr dash.gpu}" />
+            <c:Icon Grid.Column="1" Data="{DynamicResource ico.chip}" Width="15" Height="15" Foreground="{DynamicResource Np.TextFaint}" />
+          </Grid>
+          <Grid Width="116" Height="116" HorizontalAlignment="Center">
+            <c:ArcGauge Value="{Binding GpuTemp}" Maximum="100" HotThreshold="87" ValueBrush="#A3E635" Thickness="10" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="{Binding GpuTempText}" FontSize="21" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock Text="{l:Tr dash.temperature}" Classes="faint" FontSize="11" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+          <StackPanel Spacing="2" HorizontalAlignment="Center">
+            <TextBlock HorizontalAlignment="Center" FontWeight="SemiBold">
+              <Run Text="{l:Tr dash.usage}" /><Run Text=" " /><Run Text="{Binding GpuLoadText}" />
+            </TextBlock>
+            <TextBlock Classes="caption" Text="{Binding GpuClockText}" HorizontalAlignment="Center" TextAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" Padding="14,16">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="label" Text="{l:Tr dash.cpuFan}" />
+            <c:Icon Grid.Column="1" Data="{DynamicResource ico.fan}" Width="15" Height="15" Foreground="{DynamicResource Np.TextFaint}" />
+          </Grid>
+          <Grid Width="116" Height="116" HorizontalAlignment="Center">
+            <c:ArcGauge Value="{Binding CpuFanValue}" Maximum="{Binding FanScale}" ValueBrush="#38BDF8" Thickness="10" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="{Binding CpuFanNumber}" FontSize="21"
+                         FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock Text="RPM" Classes="faint" FontSize="11" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="caption" HorizontalAlignment="Center" Text="{l:Tr dash.fanFollowsCpu}" TextAlignment="Center" />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card" Padding="14,16">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Classes="label" Text="{l:Tr dash.gpuFan}" />
+            <c:Icon Grid.Column="1" Data="{DynamicResource ico.fan}" Width="15" Height="15" Foreground="{DynamicResource Np.TextFaint}" />
+          </Grid>
+          <Grid Width="116" Height="116" HorizontalAlignment="Center">
+            <c:ArcGauge Value="{Binding GpuFanValue}" Maximum="{Binding FanScale}" ValueBrush="#A3E635" Thickness="10" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="{Binding GpuFanNumber}" FontSize="21"
+                         FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock Text="RPM" Classes="faint" FontSize="11" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+          <TextBlock Classes="caption" HorizontalAlignment="Center" Text="{l:Tr dash.fanFollowsGpu}" TextAlignment="Center" />
+        </StackPanel>
+      </Border>
+    </UniformGrid>
+
+    <!-- Temperature history -->
+    <Border Grid.Row="1" Classes="card">
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+          <TextBlock Classes="h2" Text="{l:Tr dash.tempHistory}" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="14">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Ellipse Width="8" Height="8" Fill="#38BDF8" VerticalAlignment="Center" />
+              <TextBlock Classes="caption" Text="CPU" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Ellipse Width="8" Height="8" Fill="#A3E635" VerticalAlignment="Center" />
+              <TextBlock Classes="caption" Text="GPU" />
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+        <TextBlock DockPanel.Dock="Bottom" Classes="faint" FontSize="11" Text="{l:Tr dash.lastMinutes}" HorizontalAlignment="Right" />
+        <c:HistoryChart Height="210" Series="{Binding TempSeries}" Revision="{Binding ChartRevision}" Minimum="20" Maximum="100" Unit="°" />
+      </DockPanel>
+    </Border>
+
+    <!-- Quick controls -->
+    <Border Grid.Row="1" Grid.Column="1" Grid.RowSpan="2" Classes="card">
+      <StackPanel Spacing="10">
+        <TextBlock Classes="h2" Text="{l:Tr dash.quick}" />
+        <TextBlock Classes="label" Text="{l:Tr dash.mode}" Margin="0,4,0,0" />
+        <ItemsControl ItemsSource="{Binding Modes}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="6" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:ModeItem">
+              <Button Classes="tile" Classes.on="{Binding IsCurrent}" Padding="12,9" Command="{Binding SelectCommand}"
+                      IsEnabled="{Binding IsAvailable}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <c:Icon Data="{Binding Icon}" Foreground="{Binding Brush}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="10,0" VerticalAlignment="Center" FontWeight="Medium" />
+                  <c:Icon Grid.Column="2" Data="{DynamicResource ico.check}" Foreground="{Binding Brush}" Width="16" Height="16"
+                          IsVisible="{Binding IsCurrent}" />
+                </Grid>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Button Classes="turbo" Classes.on="{Binding IsTurbo}" Command="{Binding ToggleTurboCommand}"
+                IsEnabled="{Binding CanTurbo}" Margin="0,4,0,0">
+          <Grid ColumnDefinitions="Auto,*">
+            <Border Classes="bubble" Background="#26F43F5E">
+              <c:Icon Data="{DynamicResource ico.flame}" Foreground="#F43F5E" />
+            </Border>
+            <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+              <TextBlock Text="{Binding TurboText}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding TurboHint}" Classes="caption" FontSize="11.5" />
+            </StackPanel>
+          </Grid>
+        </Button>
+
+        <TextBlock Classes="label" Text="{l:Tr dash.fans}" Margin="0,8,0,0" />
+        <Border Classes="segbar" HorizontalAlignment="Stretch">
+          <UniformGrid Columns="4" Classes="compact">
+            <Button Classes="seg" Classes.on="{Binding FanChoice, Converter={x:Static vm:Is.Auto}}" MinWidth="0"
+                    Content="{l:Tr fans.auto.short}" Command="{Binding SetFansCommand}" CommandParameter="auto" />
+            <Button Classes="seg" Classes.on="{Binding FanChoice, Converter={x:Static vm:Is.Max}}" MinWidth="0"
+                    Content="{l:Tr fans.max.short}" Command="{Binding SetFansCommand}" CommandParameter="max" />
+            <Button Classes="seg" Classes.on="{Binding FanChoice, Converter={x:Static vm:Is.Curve}}" MinWidth="0"
+                    Content="{l:Tr fans.curve.short}" Command="{Binding SetFansCommand}" CommandParameter="curve" />
+            <Button Classes="seg" Classes.on="{Binding FanChoice, Converter={x:Static vm:Is.Manual}}" MinWidth="0"
+                    Content="{l:Tr fans.manual.short}" Command="{Binding SetFansCommand}" CommandParameter="manual" />
+          </UniformGrid>
+        </Border>
+        <TextBlock Classes="caption" Text="{Binding FanChoiceText}" />
+      </StackPanel>
+    </Border>
+
+    <!-- Fan and load history -->
+    <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="16">
+      <Border Classes="card">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="h3" Text="{l:Tr dash.fanHistory}" />
+          <c:HistoryChart Height="130" Series="{Binding FanSeries}" Revision="{Binding ChartRevision}" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="card">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="h3" Text="{l:Tr dash.loadHistory}" />
+          <c:HistoryChart Height="130" Series="{Binding LoadSeries}" Revision="{Binding ChartRevision}" Maximum="100" Unit="%" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Other sensors -->
+    <Border Grid.Row="3" Grid.ColumnSpan="2" Classes="card" Padding="18,14">
+      <UniformGrid Columns="4">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="label" Text="{l:Tr dash.system}" />
+          <TextBlock Classes="value" Text="{Binding SystemTempText}" />
+        </StackPanel>
+        <StackPanel Spacing="2">
+          <TextBlock Classes="label" Text="{l:Tr dash.ssd}" />
+          <TextBlock Classes="value" Text="{Binding SsdTempText}" />
+        </StackPanel>
+        <StackPanel Spacing="2">
+          <TextBlock Classes="label" Text="{l:Tr dash.gpuPower}" />
+          <TextBlock Classes="value" Text="{Binding GpuPowerText}" />
+        </StackPanel>
+        <StackPanel Spacing="2">
+          <TextBlock Classes="label" Text="{l:Tr dash.gpuOc}" />
+          <TextBlock Classes="value" Text="{Binding GpuOcSummary}" />
+        </StackPanel>
+      </UniformGrid>
+    </Border>
+  </Grid>
+</UserControl>

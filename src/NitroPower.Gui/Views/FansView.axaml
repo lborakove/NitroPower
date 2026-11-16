@@ -1,0 +1,181 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             xmlns:l="using:NitroPower.Gui.Localization"
+             x:Class="NitroPower.Gui.Views.FansView"
+             x:DataType="vm:FansViewModel">
+  <StackPanel Spacing="16">
+
+    <!-- Choice -->
+    <UniformGrid Columns="4" ColumnSpacing="12">
+      <Button Classes="tile choice" Classes.on="{Binding IsAuto}" Command="{Binding SelectCommand}" CommandParameter="auto">
+        <StackPanel Spacing="10">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.auto}" Width="19" Height="19" /></Border>
+          <TextBlock Classes="h2" Text="{l:Tr fans.auto}" />
+          <TextBlock Classes="caption" Text="{l:Tr fans.auto.desc}" />
+        </StackPanel>
+      </Button>
+      <Button Classes="tile choice" Classes.on="{Binding IsMax}" Command="{Binding SelectCommand}" CommandParameter="max">
+        <StackPanel Spacing="10">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.wind}" Width="19" Height="19" /></Border>
+          <TextBlock Classes="h2" Text="{l:Tr fans.max}" />
+          <TextBlock Classes="caption" Text="{l:Tr fans.max.desc}" />
+        </StackPanel>
+      </Button>
+      <Button Classes="tile choice" Classes.on="{Binding IsManual}" Command="{Binding SelectCommand}" CommandParameter="manual">
+        <StackPanel Spacing="10">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.sliders}" Width="19" Height="19" /></Border>
+          <TextBlock Classes="h2" Text="{l:Tr fans.manual}" />
+          <TextBlock Classes="caption" Text="{l:Tr fans.manual.desc}" />
+        </StackPanel>
+      </Button>
+      <Button Classes="tile choice" Classes.on="{Binding IsCurve}" Command="{Binding SelectCommand}" CommandParameter="curve">
+        <StackPanel Spacing="10">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.curve}" Width="19" Height="19" /></Border>
+          <TextBlock Classes="h2" Text="{l:Tr fans.curve}" />
+          <TextBlock Classes="caption" Text="{l:Tr fans.curve.desc}" />
+        </StackPanel>
+      </Button>
+    </UniformGrid>
+
+    <Border Classes="notice" IsVisible="{Binding IsTurbo}">
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <c:Icon Data="{DynamicResource ico.flame}" Foreground="#F43F5E" />
+        <TextBlock Classes="wrap" Text="{l:Tr fans.turboNote}" VerticalAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+    <!-- Live -->
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <c:Icon Data="{DynamicResource ico.fan}" Foreground="#38BDF8" />
+            <TextBlock Classes="h3" Text="{l:Tr fans.curve.cpu}" VerticalAlignment="Center" />
+          </StackPanel>
+          <UniformGrid Columns="3">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="label" Text="{l:Tr fans.speed}" />
+              <TextBlock Classes="value" Text="{Binding CpuRpm}" />
+            </StackPanel>
+            <StackPanel Spacing="2">
+              <TextBlock Classes="label" Text="{l:Tr fans.duty}" />
+              <TextBlock Classes="value" Text="{Binding CpuDuty}" />
+            </StackPanel>
+            <StackPanel Spacing="2">
+              <TextBlock Classes="label" Text="{l:Tr fans.cpuTemp}" />
+              <TextBlock Classes="value" Text="{Binding CpuTemp}" />
+            </StackPanel>
+          </UniformGrid>
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="card">
+        <StackPanel Spacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <c:Icon Data="{DynamicResource ico.fan}" Foreground="#A3E635" />
+            <TextBlock Classes="h3" Text="{l:Tr fans.curve.gpu}" VerticalAlignment="Center" />
+          </StackPanel>
+          <UniformGrid Columns="3">
+            <StackPanel Spacing="2">
+              <TextBlock Classes="label" Text="{l:Tr fans.speed}" />
+              <TextBlock Classes="value" Text="{Binding GpuRpm}" />
+            </StackPanel>
+            <StackPanel Spacing="2">
+              <TextBlock Classes="label" Text="{l:Tr fans.duty}" />
+              <TextBlock Classes="value" Text="{Binding GpuDuty}" />
+            </StackPanel>
+            <StackPanel Spacing="2">
+              <TextBlock Classes="label" Text="{l:Tr fans.gpuTemp}" />
+              <TextBlock Classes="value" Text="{Binding GpuTemp}" />
+            </StackPanel>
+          </UniformGrid>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Manual speeds -->
+    <Border Classes="card" IsVisible="{Binding IsManual}">
+      <StackPanel Spacing="12">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="2">
+            <TextBlock Classes="h2" Text="{l:Tr fans.manual.title}" />
+            <TextBlock Classes="caption" Text="{l:Tr fans.manual.hint}" />
+          </StackPanel>
+          <CheckBox Grid.Column="1" IsChecked="{Binding LinkSpeeds}" Content="{l:Tr fans.link}" />
+        </Grid>
+        <Grid ColumnDefinitions="60,*,60" RowDefinitions="Auto,Auto" RowSpacing="6">
+          <TextBlock Text="CPU" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#38BDF8" />
+          <Slider Grid.Column="1" Minimum="1" Maximum="100" Value="{Binding ManualCpu}" TickFrequency="5"
+                  IsSnapToTickEnabled="False" SmallChange="1" LargeChange="10" />
+          <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold"
+                     Text="{Binding ManualCpu, StringFormat={}{0}%}" />
+          <TextBlock Grid.Row="1" Text="GPU" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#A3E635" />
+          <Slider Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="100" Value="{Binding ManualGpu}" SmallChange="1"
+                  LargeChange="10" />
+          <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontWeight="SemiBold"
+                     Text="{Binding ManualGpu, StringFormat={}{0}%}" />
+        </Grid>
+      </StackPanel>
+    </Border>
+
+    <!-- Curve editor -->
+    <Border Classes="card">
+      <StackPanel Spacing="12">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="2">
+            <TextBlock Classes="h2" Text="{l:Tr fans.curve.title}" />
+            <TextBlock Classes="caption" Text="{l:Tr fans.curve.hint}" />
+          </StackPanel>
+          <Border Grid.Column="1" Classes="segbar" VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal">
+              <Button Classes="seg" Classes.on="{Binding EditingCpu}" Content="{l:Tr fans.curve.cpu}"
+                      Command="{Binding EditCommand}" CommandParameter="cpu" />
+              <Button Classes="seg" Classes.on="{Binding EditingGpu}" Content="{l:Tr fans.curve.gpu}"
+                      Command="{Binding EditCommand}" CommandParameter="gpu" />
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <c:FanCurveEditor Height="300" Points="{Binding EditingPoints}" CurveColor="{Binding EditingColor}"
+                          MarkerTemperature="{Binding MarkerTemp}" />
+
+        <TextBlock Text="{Binding CurveSummary}" Classes="dim" FontSize="12" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding CurveError}" Classes="danger" FontSize="12"
+                   IsVisible="{Binding CurveError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Classes="primary" Command="{Binding ApplyCurveCommand}"
+                    IsEnabled="{Binding CurveError, Converter={x:Static ObjectConverters.IsNull}}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:Icon Data="{DynamicResource ico.check}" Width="16" Height="16" />
+                <TextBlock Text="{l:Tr fans.curve.apply}" />
+              </StackPanel>
+            </Button>
+            <Button Classes="ghost" Command="{Binding RevertCurveCommand}" IsEnabled="{Binding CurveDirty}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:Icon Data="{DynamicResource ico.undo}" Width="16" Height="16" />
+                <TextBlock Text="{l:Tr common.undo}" />
+              </StackPanel>
+            </Button>
+            <Button Classes="ghost" Command="{Binding CopyToOtherCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:Icon Data="{DynamicResource ico.copy}" Width="16" Height="16" />
+                <TextBlock>
+                  <Run Text="{l:Tr fans.curve.copyTo}" /><Run Text=" " /><Run Text="{Binding OtherName}" />
+                </TextBlock>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+            <TextBlock Classes="label" Text="{l:Tr fans.curve.presets}" VerticalAlignment="Center" Margin="0,0,4,0" />
+            <Button Classes="ghost" Content="{l:Tr fans.curve.quiet}" Command="{Binding UsePresetCommand}" CommandParameter="quiet" />
+            <Button Classes="ghost" Content="{l:Tr fans.curve.balanced}" Command="{Binding UsePresetCommand}" CommandParameter="balanced" />
+            <Button Classes="ghost" Content="{l:Tr fans.curve.aggressive}" Command="{Binding UsePresetCommand}" CommandParameter="aggressive" />
+          </StackPanel>
+        </Grid>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

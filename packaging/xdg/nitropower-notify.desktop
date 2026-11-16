@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=NitroPower notifications
+Comment=Shows mode, turbo and Nitro key changes
+Exec=nitropower-cli watch --notify
+Icon=power-profile-performance-symbolic
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-GNOME-AutoRestart=true

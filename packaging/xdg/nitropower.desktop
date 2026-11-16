@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=NitroPower
+GenericName=Laptop control
+GenericName[pt_BR]=Controle do notebook
+Comment=Modes, turbo, fans, battery and keyboard of Acer Nitro/Predator laptops
+Comment[pt_BR]=Modos, turbo, ventoinhas, bateria e teclado de notebooks Acer Nitro/Predator
+Exec=nitropower
+Icon=nitropower
+Terminal=false
+Categories=Settings;HardwareSettings;
+Keywords=acer;nitro;predator;fan;turbo;battery;overclock;ventoinha;bateria;
+StartupWMClass=nitropower
+SingleMainWindow=true
+Actions=Turbo;Dashboard;
+
+[Desktop Action Turbo]
+Name=Turbo on/off
+Name[pt_BR]=Ligar/desligar o turbo
+Exec=nitropower-cli turbo toggle
+
+[Desktop Action Dashboard]
+Name=Fans
+Name[pt_BR]=Ventoinhas
+Exec=nitropower --page fans

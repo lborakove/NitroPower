@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>nitropowerd</AssemblyName>
+    <RootNamespace>NitroPower.Daemon</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NitroPower.Core\NitroPower.Core.csproj" />
+  </ItemGroup>
+
+  <!-- Model profiles next to the executable (portable and development runs) -->
+  <ItemGroup>
+    <None Include="..\..\profiles\*.json" Link="profiles\%(Filename)%(Extension)"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

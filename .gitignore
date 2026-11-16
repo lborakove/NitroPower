@@ -1,0 +1,38 @@
+# .NET build output
+bin/
+obj/
+/artifacts/
+TestResults/
+*.trx
+coverage*.xml
+*.binlog
+
+# Packages
+*.deb
+*.ddeb
+*.buildinfo
+*.changes
+
+# Editors and OS
+*.user
+*.swp
+*~
+.vs/
+.vscode/
+.idea/
+.DS_Store
+
+# Kernel module build output (driver/)
+driver/**/*.o
+driver/**/*.o.d
+driver/**/*.ko
+driver/**/*.mod
+driver/**/*.mod.c
+driver/**/.*.cmd
+driver/**/.cache.mk
+driver/**/.tmp_versions/
+driver/**/Module.symvers
+driver/**/modules.order
+
+# Screenshot tool default output (tools/NitroPower.Gui.Shots)
+/shots/

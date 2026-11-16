@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <ApiProtocolVersion>1</ApiProtocolVersion>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Authors>NitroPower contributors</Authors>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+  </PropertyGroup>
+</Project>

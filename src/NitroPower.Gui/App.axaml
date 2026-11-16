@@ -1,0 +1,36 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:v="using:NitroPower.Gui.Views"
+             x:Class="NitroPower.Gui.App"
+             Name="NitroPower"
+             RequestedThemeVariant="Dark">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Styles/Colors.axaml" />
+        <ResourceInclude Source="/Styles/Icons.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+  <Application.Styles>
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Dark" Accent="#2DD4BF" RegionColor="#0B0F17" />
+        <ColorPaletteResources x:Key="Light" Accent="#0D9488" RegionColor="#F3F5F9" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+    <StyleInclude Source="/Styles/Controls.axaml" />
+  </Application.Styles>
+  <Application.DataTemplates>
+    <DataTemplate DataType="vm:DashboardViewModel"><v:DashboardView /></DataTemplate>
+    <DataTemplate DataType="vm:PerformanceViewModel"><v:PerformanceView /></DataTemplate>
+    <DataTemplate DataType="vm:FansViewModel"><v:FansView /></DataTemplate>
+    <DataTemplate DataType="vm:BatteryViewModel"><v:BatteryView /></DataTemplate>
+    <DataTemplate DataType="vm:DeviceViewModel"><v:DeviceView /></DataTemplate>
+    <DataTemplate DataType="vm:NitroKeyViewModel"><v:NitroKeyView /></DataTemplate>
+    <DataTemplate DataType="vm:PresetsViewModel"><v:PresetsView /></DataTemplate>
+    <DataTemplate DataType="vm:SystemViewModel"><v:SystemView /></DataTemplate>
+  </Application.DataTemplates>
+</Application>

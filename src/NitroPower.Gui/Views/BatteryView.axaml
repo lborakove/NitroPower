@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:v="using:NitroPower.Gui.Views"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             xmlns:l="using:NitroPower.Gui.Localization"
+             x:Class="NitroPower.Gui.Views.BatteryView"
+             x:DataType="vm:BatteryViewModel">
+  <StackPanel Spacing="16">
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <!-- Charge -->
+      <Border Classes="card">
+        <Grid ColumnDefinitions="Auto,*">
+          <Grid Width="130" Height="130" VerticalAlignment="Top">
+            <c:ArcGauge Value="{Binding Percent}" Maximum="100" ValueBrush="{DynamicResource Np.Ok}" Thickness="11" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="{Binding PercentText}" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock Text="{l:Tr battery.charge}" Classes="faint" FontSize="11" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+          <StackPanel Grid.Column="1" Margin="20,0,0,0" Spacing="10" VerticalAlignment="Center">
+            <TextBlock Classes="h2" Text="{Binding StateText}" />
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" RowSpacing="10">
+              <StackPanel Spacing="2">
+                <TextBlock Classes="label" Text="{l:Tr battery.rate}" />
+                <TextBlock Classes="value" Text="{Binding RateText}" />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="2">
+                <TextBlock Classes="label" Text="{l:Tr battery.time}" />
+                <TextBlock Classes="value" Text="{Binding TimeText}" />
+              </StackPanel>
+              <StackPanel Grid.Row="1" Spacing="2">
+                <TextBlock Classes="label" Text="{l:Tr battery.energy}" />
+                <TextBlock Classes="value" Text="{Binding EnergyText}" />
+              </StackPanel>
+              <StackPanel Grid.Row="1" Grid.Column="1" Spacing="2">
+                <TextBlock Classes="label" Text="{l:Tr battery.voltage}" />
+                <TextBlock Classes="value" Text="{Binding VoltageText}" />
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- Health -->
+      <Border Grid.Column="1" Classes="card">
+        <Grid ColumnDefinitions="Auto,*">
+          <Grid Width="130" Height="130" VerticalAlignment="Top">
+            <c:ArcGauge Value="{Binding Health}" Maximum="100" ValueBrush="#60A5FA" Thickness="11" />
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="{Binding HealthText}" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock Text="{l:Tr battery.health}" Classes="faint" FontSize="11" HorizontalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+          <StackPanel Grid.Column="1" Margin="20,0,0,0" Spacing="10" VerticalAlignment="Center">
+            <TextBlock Classes="h2" Text="{l:Tr battery.wear}" />
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" RowSpacing="10">
+              <StackPanel Grid.ColumnSpan="2" Spacing="2">
+                <TextBlock Classes="label" Text="{l:Tr battery.capacityLabel}" />
+                <TextBlock Classes="value" Text="{Binding CapacityText}" />
+              </StackPanel>
+              <StackPanel Grid.Row="1" Spacing="2">
+                <TextBlock Classes="label" Text="{l:Tr battery.cycles}" />
+                <TextBlock Classes="value" Text="{Binding CyclesText}" />
+              </StackPanel>
+              <StackPanel Grid.Row="1" Grid.Column="1" Spacing="2">
+                <TextBlock Classes="label" Text="{l:Tr battery.model}" />
+                <TextBlock Classes="value" FontSize="13" Text="{Binding ModelText}" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- Charging care -->
+    <Border Classes="card">
+      <StackPanel>
+        <TextBlock Classes="h2" Text="{l:Tr battery.care}" Margin="0,0,0,14" />
+        <v:FeatureRow DataContext="{Binding Limiter}" />
+        <Border Classes="divider" />
+        <v:FeatureRow DataContext="{Binding Calibration}" />
+      </StackPanel>
+    </Border>
+
+    <!-- USB charging -->
+    <Border Classes="card" IsVisible="{Binding HasUsbCharging}">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Border Classes="bubble" VerticalAlignment="Top">
+          <c:Icon Data="{DynamicResource ico.usb}" Width="19" Height="19" />
+        </Border>
+        <StackPanel Grid.Column="1" Margin="14,0,16,0" Spacing="2" VerticalAlignment="Center">
+          <TextBlock Classes="h3" Text="{l:Tr usb.title}" />
+          <TextBlock Classes="caption" Text="{l:Tr usb.desc}" />
+        </StackPanel>
+        <Border Grid.Column="2" Classes="segbar" VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal">
+            <Button Classes="seg" Classes.on="{Binding Usb0}" Content="{l:Tr common.off}" Command="{Binding SetUsbCommand}" CommandParameter="0" />
+            <Button Classes="seg" Classes.on="{Binding Usb10}" Content="10%" Command="{Binding SetUsbCommand}" CommandParameter="10" />
+            <Button Classes="seg" Classes.on="{Binding Usb20}" Content="20%" Command="{Binding SetUsbCommand}" CommandParameter="20" />
+            <Button Classes="seg" Classes.on="{Binding Usb30}" Content="30%" Command="{Binding SetUsbCommand}" CommandParameter="30" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

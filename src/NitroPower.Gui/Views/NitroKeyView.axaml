@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             xmlns:l="using:NitroPower.Gui.Localization"
+             x:Class="NitroPower.Gui.Views.NitroKeyView"
+             x:DataType="vm:NitroKeyViewModel">
+  <StackPanel Spacing="16">
+    <Border Classes="card">
+      <StackPanel Spacing="14">
+        <StackPanel Spacing="2">
+          <TextBlock Classes="h2" Text="{l:Tr key.title}" />
+          <TextBlock Classes="caption" Text="{l:Tr key.desc}" />
+        </StackPanel>
+        <ItemsControl ItemsSource="{Binding Actions}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><UniformGrid Columns="2" ColumnSpacing="12" RowSpacing="12" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:KeyActionOption">
+              <Button Classes="tile choice" Classes.on="{Binding IsSelected}" Command="{Binding SelectCommand}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                  <Border Classes="bubble" VerticalAlignment="Top">
+                    <c:Icon Data="{Binding Icon}" Width="19" Height="19" />
+                  </Border>
+                  <StackPanel Grid.Column="1" Margin="14,0,8,0" Spacing="3">
+                    <TextBlock Classes="h3" Text="{Binding Title}" />
+                    <TextBlock Classes="caption" Text="{Binding Description}" />
+                  </StackPanel>
+                  <Border Grid.Column="2" Width="20" Height="20" CornerRadius="10" Background="{DynamicResource Np.Accent}"
+                          IsVisible="{Binding IsSelected}" VerticalAlignment="Top">
+                    <c:Icon Data="{DynamicResource ico.check}" Foreground="{DynamicResource Np.AccentText}" Width="13" Height="13" StrokeThickness="3" />
+                  </Border>
+                </Grid>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <Border Classes="card">
+        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="14">
+          <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.nitrokey}" Width="19" Height="19" /></Border>
+          <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+            <TextBlock Classes="h3" Text="{l:Tr key.test}" />
+            <TextBlock Classes="caption" Text="{l:Tr key.test.desc}" />
+          </StackPanel>
+          <Button Grid.Row="1" Grid.ColumnSpan="2" Classes="primary" Command="{Binding TestCommand}" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <c:Icon Data="{DynamicResource ico.play}" Width="16" Height="16" />
+              <TextBlock Text="{l:Tr key.test.button}" />
+            </StackPanel>
+          </Button>
+        </Grid>
+      </Border>
+      <Border Grid.Column="1" Classes="card">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="h3" Text="{l:Tr key.how}" />
+          <TextBlock Classes="caption" Text="{l:Tr key.how.desc}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <Border Classes="card" IsVisible="{Binding HasModeKey}">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.cycle}" Width="19" Height="19" /></Border>
+        <StackPanel Grid.Column="1" Margin="14,0,16,0" Spacing="2" VerticalAlignment="Center">
+          <TextBlock Classes="h3" Text="{l:Tr modekey.title}" />
+          <TextBlock Classes="caption" Text="{l:Tr modekey.desc}" />
+        </StackPanel>
+        <Border Grid.Column="2" Classes="segbar" VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal">
+            <Button Classes="seg" Classes.on="{Binding ModeKeyCycles}" Content="{l:Tr modekey.cycle}" Command="{Binding SetModeKeyCommand}" CommandParameter="cycle" />
+            <Button Classes="seg" Classes.on="{Binding ModeKeyTurbo}" Content="Turbo" Command="{Binding SetModeKeyCommand}" CommandParameter="turbo" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

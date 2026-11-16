@@ -1,0 +1,58 @@
+diff --git a/src/linuwu_sense.c b/src/linuwu_sense.c
+index 7b94b55..5d534b8 100644
+--- a/src/linuwu_sense.c
++++ b/src/linuwu_sense.c
+@@ -357,6 +357,8 @@ enum acer_wmi_predator_v4_oc {
+  static bool predator_v4;
+  static bool nitro_v4;
+  static bool experimental_ph315_predator_v4;
++ static int turbo_sense = -1;
++ static int four_zone_kb = -1;
+  static u64 supported_sensors;
+  
+  /* PH315-52 state tracking for features with non-standard return values */
+@@ -373,6 +375,8 @@ enum acer_wmi_predator_v4_oc {
+  module_param(predator_v4, bool, 0444);
+  module_param(nitro_v4, bool, 0444);
+  module_param(experimental_ph315_predator_v4, bool, 0444);
++ module_param(turbo_sense, int, 0444);
++ module_param(four_zone_kb, int, 0444);
+  MODULE_PARM_DESC(mailled, "Set initial state of Mail LED");
+  MODULE_PARM_DESC(brightness, "Set initial LCD backlight brightness");
+  MODULE_PARM_DESC(threeg, "Set initial state of 3G hardware");
+@@ -389,6 +393,10 @@ enum acer_wmi_predator_v4_oc {
+     "EXPERIMENTAL, PH315-52/53 only: also probe the predator_sense v4 interface "
+     "(platform_profile, fan_speed, battery limiter, etc.) alongside the turbo hotkey. "
+     "Untested on this hardware generation - the relevant WMI methods may simply not exist.");
++ MODULE_PARM_DESC(turbo_sense,
++    "Turbo LED/fan/OC toggle and turbo_sense/turbo_state: -1 = model default, 0 = off, 1 = on");
++ MODULE_PARM_DESC(four_zone_kb,
++    "Four-zone RGB keyboard (four_zoned_kb): -1 = model default, 0 = off, 1 = on");
+  
+  struct acer_data {
+      int mailled;
+@@ -1309,6 +1317,24 @@ static struct quirk_entry quirk_acer_nitro = {
+              "interface on hardware it has never been confirmed to support\n");
+          quirks = &quirk_acer_predator_ph315_53_experimental;
+      }
++
++     /*
++      * Per-feature overrides, for models missing from (or wrong in) the quirk
++      * table. Applied in place so that the pointer checks against
++      * quirk_unknown keep working.
++      */
++     if (turbo_sense >= 0) {
++         quirks->turbo = !!turbo_sense;
++         if (quirks->turbo && !quirks->cpu_fans && !quirks->gpu_fans) {
++             quirks->cpu_fans = 1;
++             quirks->gpu_fans = 1;
++         }
++         pr_info("turbo_sense forced %s\n", quirks->turbo ? "on" : "off");
++     }
++     if (four_zone_kb >= 0) {
++         quirks->four_zone_kb = !!four_zone_kb;
++         pr_info("four_zone_kb forced %s\n", quirks->four_zone_kb ? "on" : "off");
++     }
+  }
+  
+  /*

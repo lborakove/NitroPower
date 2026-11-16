@@ -1,0 +1,76 @@
+diff --git a/src/linuwu_sense.c b/src/linuwu_sense.c
+index 64c5950..7b94b55 100644
+--- a/src/linuwu_sense.c
++++ b/src/linuwu_sense.c
+@@ -1271,6 +1271,13 @@ static struct quirk_entry quirk_acer_nitro = {
+ 
+   /* The most performant supported profile */
+   static int acer_predator_v4_max_perf;
++
++  /*
++   * Set when the firmware reports no turbo profile: the Acer "performance"
++   * profile is then exposed as PLATFORM_PROFILE_PERFORMANCE so that
++   * power-profiles-daemon (which requires a "performance" choice) can drive it.
++   */
++  static bool acer_predator_v4_perf_is_max;
+  
+  enum acer_predator_v4_thermal_profile {
+     ACER_PREDATOR_V4_THERMAL_PROFILE_QUIET		= 0x00,
+@@ -2721,7 +2728,9 @@ static struct quirk_entry quirk_acer_nitro = {
+          *profile = PLATFORM_PROFILE_PERFORMANCE;
+          break;
+      case ACER_PREDATOR_V4_THERMAL_PROFILE_PERFORMANCE:
+-         *profile = PLATFORM_PROFILE_BALANCED_PERFORMANCE;
++         *profile = acer_predator_v4_perf_is_max
++             ? PLATFORM_PROFILE_PERFORMANCE
++             : PLATFORM_PROFILE_BALANCED_PERFORMANCE;
+          break;
+      case ACER_PREDATOR_V4_THERMAL_PROFILE_BALANCED:
+          *profile = PLATFORM_PROFILE_BALANCED;
+@@ -2769,7 +2778,9 @@ static struct quirk_entry quirk_acer_nitro = {
+ 
+      switch (profile) {
+      case PLATFORM_PROFILE_PERFORMANCE:
+-         tp = ACER_PREDATOR_V4_THERMAL_PROFILE_TURBO;
++         tp = acer_predator_v4_perf_is_max
++             ? ACER_PREDATOR_V4_THERMAL_PROFILE_PERFORMANCE
++             : ACER_PREDATOR_V4_THERMAL_PROFILE_TURBO;
+          break;
+      case PLATFORM_PROFILE_BALANCED_PERFORMANCE:
+          tp = ACER_PREDATOR_V4_THERMAL_PROFILE_PERFORMANCE;
+@@ -2861,7 +2872,15 @@ static struct quirk_entry quirk_acer_nitro = {
+          if (last_non_turbo_profile < 0)
+              last_non_turbo_profile = ACER_PREDATOR_V4_THERMAL_PROFILE_TURBO;
+      }
+- 
++
++     acer_predator_v4_perf_is_max =
++         !test_bit(ACER_PREDATOR_V4_THERMAL_PROFILE_TURBO, &supported_profiles) &&
++         test_bit(ACER_PREDATOR_V4_THERMAL_PROFILE_PERFORMANCE, &supported_profiles);
++     if (acer_predator_v4_perf_is_max) {
++         clear_bit(PLATFORM_PROFILE_BALANCED_PERFORMANCE, choices);
++         set_bit(PLATFORM_PROFILE_PERFORMANCE, choices);
++     }
++
+      return 0;
+  }
+  
+@@ -5600,8 +5619,16 @@ static acpi_status get_kb_status(struct get_four_zoned_kb_output *out){
+              pr_warn("Cannot enable accelerometer\n");
+      }
+  
+-     if (quirks->ec_mmio_profile)
+-         anv15_ec_profile_init();
++     /*
++      * Older ANV15-52 firmware (e.g. BIOS V1.31) has no EC0._Q30 handler but
++      * still implements the gaming WMI misc setting 0x0B (platform profile),
++      * which the EC path was added to work around on BIOS 1.53. Fall back to
++      * the WMI path instead of losing platform_profile entirely.
++      */
++     if (quirks->ec_mmio_profile && anv15_ec_profile_init()) {
++         pr_info("EC profile: falling back to WMI platform profile interface\n");
++         quirks->ec_mmio_profile = 0;
++     }
+ 
+      err = platform_driver_register(&acer_platform_driver);
+      if (err) {

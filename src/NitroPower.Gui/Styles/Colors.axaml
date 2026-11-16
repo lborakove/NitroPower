@@ -1,0 +1,53 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="Np.Window" Color="#0B0F17" />
+      <SolidColorBrush x:Key="Np.Sidebar" Color="#0E141F" />
+      <SolidColorBrush x:Key="Np.Card" Color="#131A26" />
+      <SolidColorBrush x:Key="Np.CardHover" Color="#18212F" />
+      <SolidColorBrush x:Key="Np.Surface" Color="#0F151F" />
+      <SolidColorBrush x:Key="Np.Border" Color="#212B3A" />
+      <SolidColorBrush x:Key="Np.Text" Color="#E6EBF2" />
+      <SolidColorBrush x:Key="Np.TextDim" Color="#94A1B5" />
+      <SolidColorBrush x:Key="Np.TextFaint" Color="#5E6A7D" />
+      <SolidColorBrush x:Key="Np.Accent" Color="#2DD4BF" />
+      <SolidColorBrush x:Key="Np.AccentText" Color="#062E2A" />
+      <SolidColorBrush x:Key="Np.AccentSoft" Color="#1F2DD4BF" />
+      <SolidColorBrush x:Key="Np.Track" Color="#202B3B" />
+      <SolidColorBrush x:Key="Np.Grid" Color="#1E2836" />
+      <SolidColorBrush x:Key="Np.Danger" Color="#FB7185" />
+      <SolidColorBrush x:Key="Np.DangerSoft" Color="#26FB7185" />
+      <SolidColorBrush x:Key="Np.Warning" Color="#FBBF24" />
+      <SolidColorBrush x:Key="Np.WarningSoft" Color="#1FFBBF24" />
+      <SolidColorBrush x:Key="Np.Ok" Color="#34D399" />
+      <SolidColorBrush x:Key="Np.Overlay" Color="#B3060A10" />
+      <SolidColorBrush x:Key="Np.Toast" Color="#1B2433" />
+      <SolidColorBrush x:Key="Np.Keyboard" Color="#0A0E15" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="Np.Window" Color="#F3F5F9" />
+      <SolidColorBrush x:Key="Np.Sidebar" Color="#E9EDF3" />
+      <SolidColorBrush x:Key="Np.Card" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="Np.CardHover" Color="#F6F8FB" />
+      <SolidColorBrush x:Key="Np.Surface" Color="#F7F9FC" />
+      <SolidColorBrush x:Key="Np.Border" Color="#DCE2EB" />
+      <SolidColorBrush x:Key="Np.Text" Color="#111827" />
+      <SolidColorBrush x:Key="Np.TextDim" Color="#525D6F" />
+      <SolidColorBrush x:Key="Np.TextFaint" Color="#8A94A4" />
+      <SolidColorBrush x:Key="Np.Accent" Color="#0D9488" />
+      <SolidColorBrush x:Key="Np.AccentText" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="Np.AccentSoft" Color="#1A0D9488" />
+      <SolidColorBrush x:Key="Np.Track" Color="#E3E8EF" />
+      <SolidColorBrush x:Key="Np.Grid" Color="#E8EDF3" />
+      <SolidColorBrush x:Key="Np.Danger" Color="#E11D48" />
+      <SolidColorBrush x:Key="Np.DangerSoft" Color="#1AE11D48" />
+      <SolidColorBrush x:Key="Np.Warning" Color="#B45309" />
+      <SolidColorBrush x:Key="Np.WarningSoft" Color="#1AD97706" />
+      <SolidColorBrush x:Key="Np.Ok" Color="#059669" />
+      <SolidColorBrush x:Key="Np.Overlay" Color="#800F172A" />
+      <SolidColorBrush x:Key="Np.Toast" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="Np.Keyboard" Color="#1F2937" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>NitroPower.Core</RootNamespace>
+    <!-- LibraryImport (NVML interop) generates unsafe marshalling code -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NitroPower.Core.Tests" />
+    <!-- Read by NitroApiProtocol.Version; set in Directory.Build.props -->
+    <AssemblyMetadata Include="ApiProtocolVersion" Value="$(ApiProtocolVersion)" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,41 @@
+[Unit]
+Description=NitroPower daemon (Acer Nitro/Predator modes, turbo, fans, Nitro key)
+After=systemd-modules-load.service
+Wants=systemd-modules-load.service
+
+[Service]
+Type=notify
+ExecStart=/usr/lib/nitropower/daemon/nitropowerd
+Restart=on-failure
+RestartSec=2
+
+# /run/nitropower (socket), /var/lib/nitropower (state), /etc/nitropower (presets)
+RuntimeDirectory=nitropower
+RuntimeDirectoryMode=0755
+StateDirectory=nitropower
+ConfigurationDirectory=nitropower
+
+# Sandbox. The daemon writes sysfs (linuwu_sense, platform_profile) and opens
+# /dev/input/event* and /dev/nvidia*, so /sys and /dev stay writable:
+# ProtectKernelTunables, PrivateDevices, ProtectClock and DeviceAllow would
+# take that away. MemoryDenyWriteExecute would break the .NET JIT.
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+RestrictAddressFamilies=AF_UNIX AF_NETLINK
+NoNewPrivileges=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+UMask=0022
+
+[Install]
+WantedBy=multi-user.target

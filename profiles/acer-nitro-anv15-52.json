@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "acer-nitro-anv15-52",
+  "displayName": "Acer Nitro V 15 (ANV15-52)",
+  "match": {
+    "dmi": { "sys_vendor": "Acer", "product_name": "Nitro ANV15-52" }
+  },
+  "firmware": {
+    "testedBios": ["V1.31", "V1.60"],
+    "notes": "BIOS V1.31/V1.60 have no EC0._Q30; the platform profile goes through gaming WMI misc setting 0x0B (driver patch 0001)."
+  },
+  "thermalModes": {
+    "source": "platform_profile",
+    "modes": [
+      { "id": "eco",         "firmwareValue": 6, "platformProfile": "low-power",   "gpuOcLevel": 0, "requiresAc": false },
+      { "id": "quiet",       "firmwareValue": 0, "platformProfile": "quiet",       "gpuOcLevel": 0, "requiresAc": true  },
+      { "id": "balanced",    "firmwareValue": 1, "platformProfile": "balanced",    "gpuOcLevel": 1, "requiresAc": false },
+      { "id": "performance", "firmwareValue": 4, "platformProfile": "performance", "gpuOcLevel": 2, "requiresAc": true  }
+    ],
+    "turboSupported": false,
+    "turboNotes": "Firmware ignores mode 5; EC table M4 (turbo) == M3 (performance)."
+  },
+  "modeCycle": {
+    "ac": ["quiet", "balanced", "performance"],
+    "battery": ["eco", "balanced"],
+    "fansAutoOn": ["quiet", "eco"],
+    "notes": "Same order as the linuwu_sense mode key. The Nitro key arrives as KEY_PROG1 (keyboard), not as WMI event 7, so the driver never runs this itself."
+  },
+  "turbo": {
+    "mode": "performance",
+    "fans": "max",
+    "notes": "No firmware turbo. Like the linuwu_sense turbo toggle: top mode (GPU OC level 2 = +100/+200) and fans at maximum; off restores the previous mode and fans."
+  },
+  "gpuOverclock": {
+    "policy": { "acOnly": true, "batteryResumePercent": 40, "batteryStopPercent": 30 },
+    "units": "MHz, NvAPI scale; memory offset is doubled for NVML",
+    "devices": [
+      {
+        "pciId": "10de:28a0", "subsystem": "1025:171e", "name": "GeForce RTX 4060 Laptop",
+        "levels": [ { "core": 0, "mem": 0 }, { "core": 0, "mem": 0 }, { "core": 100, "mem": 200 } ],
+        "validated": false,
+        "notes": "Not listed by NitroSense for this board; values used by NitroSense for the same GPU on the ANV16-41. Verified stable 2026-11-15 under load."
+      }
+    ]
+  },
+  "fans": {
+    "control": "nitro_sense/fan_speed",
+    "format": "cpu,gpu percent; 0,0 = auto",
+    "count": 2,
+    "customCurve": "unknown"
+  },
+  "features": {
+    "batteryLimiter":     "nitro_sense/battery_limiter",
+    "batteryCalibration": "nitro_sense/battery_calibration",
+    "usbCharging":        "nitro_sense/usb_charging",
+    "keyboardTimeout":    "nitro_sense/backlight_timeout",
+    "lcdOverdrive":       "nitro_sense/lcd_override",
+    "bootSound":          "nitro_sense/boot_animation_sound",
+    "bootLogo":           "unknown",
+    "winKeyLock":         "unknown",
+    "rgbKeyboard":        "none",
+    "turboLed":           "none",
+    "gpuMux":             "unknown"
+  },
+  "nitroKey": {
+    "evdevCode": 148, "name": "KEY_PROG1", "scancode": "0xf5",
+    "devices": ["AT Translated Set 2 keyboard", "Acer WMI hotkeys"],
+    "notes": "atkbd scancode 0xf5 mapped by hwdb. Listening only to these devices keeps external keyboards with KEY_PROG1 out."
+  },
+  "measurements": {
+    "ecModeTable": {
+      "address": "0xFE7084A4",
+      "stride": 8,
+      "fields": ["dynamicBoostW", "ct", "cp"],
+      "M1": [0, 0, 15], "M2": [10, 0, 20], "M3": [15, 0, 30], "M4": [15, 0, 30], "M5": [0, 0, 15]
+    },
+    "gpuPowerLimitW": { "base": 60, "balanced": 70, "performance": 75 },
+    "featureProbe": {
+      "date": "2026-11-16",
+      "bios": "V1.60",
+      "four_zone_kb=1": "four_zone_mode 0,0,0,0,0,0,0; per_zone_mode answers status 1 for all four zones (no WMI RGB engine)",
+      "turbo_sense=1": "turbo_state 0; no turbo LED",
+      "lcd_override": "GetGamingProfile answers 0xFF000001000000 (not a valid state)",
+      "boot_animation_sound": "GetGamingMiscSetting 0x06 answers status 1"
+    }
+  }
+}

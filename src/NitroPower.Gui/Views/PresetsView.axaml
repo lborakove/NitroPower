@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NitroPower.Gui.ViewModels"
+             xmlns:c="using:NitroPower.Gui.Controls"
+             xmlns:l="using:NitroPower.Gui.Localization"
+             x:Class="NitroPower.Gui.Views.PresetsView"
+             x:DataType="vm:PresetsViewModel">
+  <StackPanel Spacing="16">
+    <Border Classes="card">
+      <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="14">
+        <Border Classes="bubble"><c:Icon Data="{DynamicResource ico.save}" Width="19" Height="19" /></Border>
+        <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+          <TextBlock Classes="h2" Text="{l:Tr preset.saveTitle}" />
+          <TextBlock Classes="caption" Text="{l:Tr preset.saveDesc}" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Spacing="6">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBox Text="{Binding NewName}" Width="300" PlaceholderText="{l:Tr preset.namePlaceholder}" MaxLength="64" />
+            <Button Classes="primary" Command="{Binding SaveCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <c:Icon Data="{DynamicResource ico.plus}" Width="16" Height="16" />
+                <TextBlock Text="{l:Tr preset.save}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+          <TextBlock Classes="caption danger" Text="{Binding NameError}"
+                     IsVisible="{Binding NameError, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Border Classes="card" IsVisible="{Binding IsEmpty}">
+      <StackPanel Spacing="4" HorizontalAlignment="Center" Margin="0,16">
+        <c:Icon Data="{DynamicResource ico.layers}" Width="34" Height="34" Foreground="{DynamicResource Np.TextFaint}" HorizontalAlignment="Center" />
+        <TextBlock Classes="h3" Text="{l:Tr preset.empty}" HorizontalAlignment="Center" Margin="0,8,0,0" />
+        <TextBlock Classes="caption" Text="{l:Tr preset.empty.desc}" HorizontalAlignment="Center" TextAlignment="Center" />
+      </StackPanel>
+    </Border>
+
+    <ItemsControl ItemsSource="{Binding Presets}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate><UniformGrid Columns="3" ColumnSpacing="16" RowSpacing="16" /></ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:PresetItem">
+          <Border Classes="card" Padding="0" ClipToBounds="True">
+            <DockPanel>
+              <Border DockPanel.Dock="Top" Height="4" Background="{Binding Brush}" />
+              <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="18,0,12,14">
+                <Button Classes="primary" Command="{Binding ApplyCommand}">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <c:Icon Data="{DynamicResource ico.play}" Width="15" Height="15" />
+                    <TextBlock Text="{l:Tr preset.apply}" />
+                  </StackPanel>
+                </Button>
+                <Button Grid.Column="1" Classes="icon" Command="{Binding DeleteCommand}" ToolTip.Tip="{l:Tr common.delete}">
+                  <c:Icon Data="{DynamicResource ico.trash}" />
+                </Button>
+              </Grid>
+              <StackPanel Margin="18,14,18,14" Spacing="8">
+                <TextBlock Classes="h2" Text="{Binding Name}" />
+                <ItemsControl ItemsSource="{Binding Lines}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                      <TextBlock Classes="caption" Text="{Binding}" Margin="0,1" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </DockPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>
